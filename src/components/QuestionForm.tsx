@@ -31,57 +31,73 @@ export default function QuestionForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-lg p-6 mb-6">
-      <h3 className="text-xl font-semibold text-gray-800 mb-4">Add New Question</h3>
+    <form onSubmit={handleSubmit} className="bg-[#ffffff] rounded-xl p-2 h-full w-full border">
+      <h3 className="text-2xl font-bold text-[#0d416b] mb-2">Add New Question</h3>
       
-      <div className="mb-4">
-        <label className="block text-sm font-medium text-gray-700 mb-1">
+      <div className="mb-2">
+        <label htmlFor="question" className="block text-sm font-medium text-[#232527] mb-2">
           Question
         </label>
         <input
           type="text"
+          id="question"
           value={question}
           onChange={(e) => setQuestion(e.target.value)}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+          className="w-full px-4 py-1 border border-[#b7b2b3] rounded-lg focus:ring-0 outline-slate-400 focus:ring-none focus:border-transparent transition-all duration-200"
           placeholder="Enter your question"
           required
         />
       </div>
 
-      <div className="mb-4">
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+      <div className="mb-2">
+        <label className="block text-sm font-medium text-[#232527] mb-2">
           Options
         </label>
         <div className="space-y-2">
           {options.map((option, index) => (
-            <div key={index} className="flex items-center gap-2">
+            <div key={index} className="flex items-center gap-3">
               <input
                 type="radio"
+                id={`option${index}`}
                 name="correctAnswer"
                 checked={correctAnswer === index}
                 onChange={() => setCorrectAnswer(index)}
-                className="w-4 h-4 text-purple-600"
+                className="w-5 h-5 text-[#00aae7] border-[#b7b2b3] focus:ring-none"
               />
-              <input
-                type="text"
-                value={option}
-                onChange={(e) => handleOptionChange(index, e.target.value)}
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                placeholder={`Option ${index + 1}`}
-                required
-              />
+              <div className="relative flex-1">
+                <input
+                  type="text"
+                  value={option}
+                  onChange={(e) => handleOptionChange(index, e.target.value)}
+                  className="w-full pl-4 pr-10 py-1 border border-[#b7b2b3] rounded-lg outline-slate-400 focus:ring-0 focus:ring-none focus:border-transparent transition-all duration-200"
+                  placeholder={`Option ${index + 1}`}
+                  required
+                />
+                {option && (
+                  <button
+                    type="button"
+                    onClick={() => handleOptionChange(index, '')}
+                    className="absolute right-2 top-1/2 transform -translate-y-1/2 text-[#8c8c8c] hover:text-[#ef4048] transition-colors duration-200"
+                    aria-label="Clear option"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                )}
+              </div>
             </div>
           ))}
         </div>
       </div>
-
-      <button
-        type="submit"
-        className="flex items-center gap-2 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700"
-      >
-        <Plus className="w-4 h-4" />
-        Add Question
-      </button>
+        <div className='flex justify-end'>
+          <button
+                  type="submit"
+                  className="flex items-center justify-center w-full sm:w-auto gap-2 bg-[#00aae7] text-[#ffffff] px-3 py-1 rounded-lg hover:bg-[#00aae7]/90 transition-all duration-200 shadow-md"
+                >
+                  <Plus className="w-5 h-5" />
+                  Add Question
+                </button>
+        </div>
+      
     </form>
   );
 }

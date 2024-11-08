@@ -1,5 +1,5 @@
 import { Timer } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useSocket } from '../context/SocketContext';
 import { useGameStore } from '../store/gameStore';
@@ -9,6 +9,7 @@ interface Question {
   question: string;
   options: string[];
   correctAnswer: number;
+
 }
 
 export default function PlayerGame() {
@@ -21,14 +22,27 @@ export default function PlayerGame() {
   const gameStatus = useGameStore((state) => state.gameStatus);
   const playerName = useGameStore((state) => state.playerName);
 
+  const selectedAnswerRef = useRef(selectedAnswer);
+
+  useEffect(() => {
+    selectedAnswerRef.current = selectedAnswer;
+  },[selectedAnswer])
+
   useEffect(() => {
     if (!socket) return;
 
-    socket.on('question', (question) => {
+    socket.on('question', (question,timeLeft,type) => {
+      if(type === "next"){
+        setSelectedAnswer(null);
+        setIsAnswerLocked(false);
+      }
+      else if(selectedAnswerRef.current === null){
+        setSelectedAnswer(null);
+        setIsAnswerLocked(false);
+      }
+      console.log("selectedAnswer : "+selectedAnswerRef.current)
       setCurrentQuestion(question);
-      setTimeLeft(20);
-      setSelectedAnswer(null);
-      setIsAnswerLocked(false);
+      setTimeLeft(timeLeft);
     });
 
     socket.on('timer', (time) => {
@@ -53,6 +67,7 @@ export default function PlayerGame() {
       socket.off('game-resumed');
     };
   }, [socket]);
+
 
   const handleAnswerSelect = (answerIndex: number) => {
     console.log(answerIndex,isAnswerLocked ,gameStatus)
@@ -100,8 +115,8 @@ export default function PlayerGame() {
                     key={index}
                     onClick={() => handleAnswerSelect(index)}
                     className={`p-4 rounded-lg text-left transition-all ${
-                      selectedAnswer === index
-                        ? 'bg-purple-600 text-white'
+                      selectedAnswerRef.current === index
+                        ? 'bg-miracle-lightBlue text-white'
                         : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
                     } ${isAnswerLocked ? 'cursor-not-allowed' : 'cursor-pointer'}`}
                     disabled={isAnswerLocked}

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useSocket } from '../context/SocketContext';
-import { Play, Pause, SkipForward, Users } from 'lucide-react';
+import { Play, Pause, SkipForward, Users, Timer } from 'lucide-react';
 import { useGameStore } from '../store/gameStore';
 import QuestionForm from '../components/QuestionForm';
 import QuestionList from '../components/QuestionList';
@@ -19,6 +19,7 @@ export default function AdminGame() {
   const gameStatus = useGameStore((state) => state.gameStatus);
   const setGameStatus = useGameStore((state) => state.setGameStatus);
   const questions = useGameStore((state) => state.questions);
+  const [timeLeft, setTimeLeft] = useState<number>(20);
 
   useEffect(() => {
     if (!socket) return;
@@ -34,9 +35,15 @@ export default function AdminGame() {
     });
 
     socket.on('score-update', ({ playerId, newScore }) => {
+      console.log("updated score")
       setStudents((current) =>
         current.map(p => p.id === playerId ? { ...p, score: newScore } : p)
       );
+    });
+
+    socket.on('timer', (time) => {
+      console.log(time);
+      setTimeLeft(time);
     });
 
     return () => {
@@ -66,23 +73,21 @@ export default function AdminGame() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <div className="space-y-6">
-            <div className="bg-white rounded-lg shadow-lg p-6">
-              <div className="flex justify-between items-center mb-8">
+          <div className="h-screen  overflow-auto md:grid max-w-[90rem] mx-auto md:grid-rows-12 md:grid-cols-12 gap-2 border border-black p-2 bg-slate-100">
+
+            <div className="bg-[#ffffff] h-fit md:h-full mb-3 rounded-xl shadow-lg border p-2 md:row-start-1 md:row-end-7 md:col-start-1 md:col-end-7 md:grid md:grid-rows-10">
+              <div className="flex sm:flex-row justify-between items-start sm:items-center gap-4 mb-3 row-span-2">
                 <div>
-                  <h1 className="text-2xl font-bold text-gray-800">Game Control Panel</h1>
-                  <p className="text-gray-600">Game ID: {gameId}</p>
+                  <h1 className="text-xl font-bold text-[#0d416b]">Game Control Panel</h1>
+                  <p className="text-[#8c8c8c]">Game ID: {gameId}</p>
                 </div>
-                <div className="flex items-center gap-4">
+                <div className="flex items-center border gap-2">
                   {questions.length > 0 && (
                     <>
                       {gameStatus === 'playing' ? (
                         <button
                           onClick={() => handleGameControl('pause')}
-                          className="flex items-center gap-2 bg-yellow-500 text-white px-4 py-2 rounded-lg hover:bg-yellow-600"
+                          className="flex items-center gap-2 bg-[#ef4048] text-[#ffffff] px-2 py-2 rounded-lg hover:bg-[#ef4048]/90 transition-all duration-200 shadow-md"
                         >
                           <Pause className="w-5 h-5" />
                           Pause Game
@@ -90,7 +95,7 @@ export default function AdminGame() {
                       ) : (
                         <button
                           onClick={() => handleGameControl('start')}
-                          className="flex items-center gap-2 bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600"
+                          className="flex items-center gap-2 bg-[#00aae7] text-[#ffffff] px-2 py-2 rounded-lg hover:bg-[#00aae7]/90 transition-all duration-200 shadow-md"
                         >
                           <Play className="w-5 h-5" />
                           Start Game
@@ -98,7 +103,7 @@ export default function AdminGame() {
                       )}
                       <button
                         onClick={() => handleGameControl('next')}
-                        className="flex items-center gap-2 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
+                        className="flex items-center gap-2 bg-[#2368a0] text-[#ffffff] px-2 py-2 rounded-lg hover:bg-[#2368a0]/90 transition-all duration-200 shadow-md"
                       >
                         <SkipForward className="w-5 h-5" />
                         Next Question
@@ -107,39 +112,53 @@ export default function AdminGame() {
                   )}
                 </div>
               </div>
-
-              <div className="bg-gray-50 rounded-lg p-6">
-                <div className="flex items-center gap-2 mb-4">
-                  <Users className="w-5 h-5 text-gray-600" />
-                  <h2 className="text-xl font-semibold text-gray-800">
-                    Students ({students.length})
-                  </h2>
+              <div className=" rounded-lg row-span-8 overflow-hidden p-2 px-0">
+                <div className="flex flex-row items-center justify-between gap-4 mb-2">
+                  <div className='flex gap-2 items-center'>
+                    <Users className="w-6 h-6 text-[#2368a0]" />
+                    <h2 className="text-xl font-semibold text-[#0d416b]">
+                      Students ({students.length})
+                    </h2>
+                  </div>
+                  <div className="flex items-center gap-2 bg-[#00aae7]/20 px-4 py-2 rounded-full">
+                    <Timer className="w-5 h-5 text-[#00aae7]" />
+                    <span className="text-[#0d416b] font-medium">{timeLeft}s</span>
+                  </div>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {students.map((player) => (
-                    <div
-                      key={player.id}
-                      className="bg-white p-4 rounded-lg shadow border border-gray-200"
-                    >
-                      <div className="flex justify-between items-center">
-                        <span className="font-medium text-gray-800">{player.name}</span>
-                        <span className="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm">
-                          Score: {player.score}
-                        </span>
+                {students.length > 0 && (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-2 h-full overflow-scroll no-scrollbar pb-12">
+                    {students.map((player) => (
+                      <div
+                        key={player.id}
+                        className="bg-[#ffffff] py-2 px-1 rounded-lg shadow-md transition-all duration-200 hover:shadow-lg border"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="bg-[#2368a0]/20 p-2 rounded-full">
+                            <Users className="w-5 h-5 text-[#2368a0]" />
+                          </div>
+                          <div className="flex-1">
+                            <h3 className="font-medium text-[#232527]">{player.name}</h3>
+                            <div className="flex items-center justify-between mt-1">
+                              <span className="text-[#8c8c8c] text-sm">Score:</span>
+                              <span className="bg-[#00aae7]/20 text-[#0d416b] px-2 py-1 rounded-full text-sm font-medium">
+                                {player.score}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
-          </div>
 
-          <div className="space-y-6">
-            <QuestionForm />
-            <QuestionList />
+            <div className="h-fit md:h-full mb-3 md:row-start-7 md:row-end-13 md:col-start-1 md:col-end-7 overflow-auto shadow-lg rounded-xl border">
+              <QuestionForm />
+            </div>
+            <div className='h-fit md:h-full md:row-span-full md:col-start-7 md:col-end-13 overflow-scroll no-scrollbar pb-2'>
+              <QuestionList />
+            </div>
           </div>
-        </div>
-      </div>
-    </div>
   );
 }
