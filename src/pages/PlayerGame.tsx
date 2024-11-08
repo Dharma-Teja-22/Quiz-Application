@@ -68,30 +68,30 @@ export default function PlayerGame() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-600 to-blue-500 p-4">
+    <div className="min-h-screen bg-gradient-to-br bg-miracle-lightGrey/30 p-4">
       <div className="max-w-2xl mx-auto">
-        <div className="bg-white rounded-lg shadow-lg p-6 mb-4">
+        <div className="bg-miracle-white rounded-lg shadow-lg p-6 mb-4">
           <div className="flex justify-between items-center mb-6">
             <div>
-              <h2 className="text-lg font-semibold text-gray-800">{playerName}</h2>
+              <h2 className="text-lg font-semibold text-miracle-black">{playerName}</h2>
             
             </div>
             {gameStatus === 'playing' && (
-              <div className="flex items-center gap-2 bg-blue-100 px-4 py-2 rounded-full">
-                <Timer className="w-4 h-4 text-blue-600" />
-                <span className="text-blue-600 font-medium">{timeLeft}s</span>
+              <div className="flex items-center gap-2 bg-miracle-lightBlue/20 px-4 py-2 rounded-full">
+                <Timer className="w-4 h-4 text-miracle-darkBlue" />
+                <span className="text-miracle-darkBlue font-medium">{timeLeft}s</span>
               </div>
             )}
           </div>
 
           {gameStatus === 'paused' ? (
             <div className="text-center py-8">
-              <h3 className="text-xl font-semibold text-gray-800">Game Paused</h3>
-              <p className="text-gray-600">Waiting for the host to resume...</p>
+              <h3 className="text-xl font-semibold text-miracle-black">Game Paused</h3>
+              <p className="text-miracle-darkGrey">Waiting for the host to resume...</p>
             </div>
           ) : currentQuestion ? (
             <>
-              <h3 className="text-xl font-semibold text-gray-800 mb-6">
+              <h3 className="text-xl font-semibold text-miracle-black mb-6">
                 {currentQuestion.question}
               </h3>
               <div className="grid grid-cols-2 gap-4">
@@ -101,8 +101,8 @@ export default function PlayerGame() {
                     onClick={() => handleAnswerSelect(index)}
                     className={`p-4 rounded-lg text-left transition-all ${
                       selectedAnswer === index
-                        ? 'bg-purple-600 text-white'
-                        : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
+                        ? 'bg-miracle-lightBlue text-white'
+                        : 'bg-miracle-lightGrey/25 text-miracle-back hover:bg-miracle-lightGrey/20'
                     } ${isAnswerLocked ? 'cursor-not-allowed' : 'cursor-pointer'}`}
                     disabled={isAnswerLocked}
                   >
@@ -113,7 +113,7 @@ export default function PlayerGame() {
             </>
           ) : (
             <div className="text-center py-8">
-              <h3 className="text-xl font-semibold text-gray-800">
+              <h3 className="text-xl font-semibold text-miracle-black">
                 Waiting for the next question...
               </h3>
             </div>

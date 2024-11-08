@@ -127,7 +127,7 @@ function startQuestion(gameId) {
   game.timer = setInterval(() => {
     timeLeft--;
     io.to(gameId).emit('timer', timeLeft);
-
+    
     if (timeLeft <= 0) {
       clearInterval(game.timer);
       // Move to next question or end game

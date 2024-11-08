@@ -30,13 +30,13 @@ export default function JoinGame() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-600 to-blue-500 flex items-center justify-center p-4">
-      <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-8">
-        <h1 className="text-2xl font-bold text-gray-800 mb-6">Join Game</h1>
+    <div className="min-h-screen bg-gradient-to-br border-r-miracle-white flex items-center justify-center p-4">
+      <div className="max-w-md w-full space-y-8 bg-miracle-lightGrey/25 p-8 rounded-xl shadow-lg">
+        <h1 className="text-2xl font-bold text-miracle-black mb-6">Join Quiz</h1>
         
         <form onSubmit={handleJoin} className="space-y-6">
           <div>
-            <label htmlFor="gameId" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="gameId" className="block text-sm font-medium text-miracle-black mb-1">
               Game Code
             </label>
             <input
@@ -44,13 +44,13 @@ export default function JoinGame() {
               id="gameId"
               value={gameId}
               onChange={(e) => setGameId(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              className="w-full px-4 py-2 border border-miracle-lightgray rounded-lg   focus:border-transparent"
               placeholder="Enter game code"
             />
           </div>
 
           <div>
-            <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="name" className="block text-sm font-medium text-miracle-black mb-1">
               Your Name
             </label>
             <input
@@ -58,7 +58,7 @@ export default function JoinGame() {
               id="name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              className="w-full px-4 py-2 border border-miracle-lightgray rounded-lg  focus:border-transparent"
               placeholder="Enter your name"
             />
           </div>
@@ -69,7 +69,7 @@ export default function JoinGame() {
 
           <button
             type="submit"
-            className="w-full flex items-center justify-center gap-2 bg-purple-600 text-white py-3 rounded-lg font-semibold hover:bg-purple-700 transition-colors"
+            className="w-full flex items-center justify-center gap-2 bg-miracle-darkBlue text-white py-3 rounded-lg font-semibold hover:bg-miracle-mediumBlue transition-colors"
           >
             Join Game
             <ArrowRight className="w-5 h-5" />

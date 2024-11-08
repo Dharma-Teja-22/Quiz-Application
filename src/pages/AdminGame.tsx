@@ -70,10 +70,10 @@ export default function AdminGame() {
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <div className="space-y-6">
-            <div className="bg-white rounded-lg shadow-lg p-6">
+            <div className="bg-miracle-white rounded-lg shadow-lg p-6">
               <div className="flex justify-between items-center mb-8">
                 <div>
-                  <h1 className="text-2xl font-bold text-gray-800">Game Control Panel</h1>
+                  <h1 className="text-2xl font-bold text-miracle-black">Game Control Panel</h1>
                   <p className="text-gray-600">Game ID: {gameId}</p>
                 </div>
                 <div className="flex items-center gap-4">
@@ -82,7 +82,7 @@ export default function AdminGame() {
                       {gameStatus === 'playing' ? (
                         <button
                           onClick={() => handleGameControl('pause')}
-                          className="flex items-center gap-2 bg-yellow-500 text-white px-4 py-2 rounded-lg hover:bg-yellow-600"
+                          className="flex items-center gap-2 bg-miracle-darkBlue text-white px-4 py-2 rounded-lg hover:bg-miracle-mediumBlue"
                         >
                           <Pause className="w-5 h-5" />
                           Pause Game
@@ -90,7 +90,7 @@ export default function AdminGame() {
                       ) : (
                         <button
                           onClick={() => handleGameControl('start')}
-                          className="flex items-center gap-2 bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600"
+                          className="flex items-center gap-2 bg-miracle-lightBlue text-white px-4 py-2 rounded-lg hover:bg-miracle-lightBlue/80"
                         >
                           <Play className="w-5 h-5" />
                           Start Game
@@ -98,7 +98,7 @@ export default function AdminGame() {
                       )}
                       <button
                         onClick={() => handleGameControl('next')}
-                        className="flex items-center gap-2 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
+                        className="flex items-center gap-2 bg-miracle-darkBlue text-white px-4 py-2 rounded-lg hover:bg-miracle-mediumBlue"
                       >
                         <SkipForward className="w-5 h-5" />
                         Next Question
@@ -110,8 +110,8 @@ export default function AdminGame() {
 
               <div className="bg-gray-50 rounded-lg p-6">
                 <div className="flex items-center gap-2 mb-4">
-                  <Users className="w-5 h-5 text-gray-600" />
-                  <h2 className="text-xl font-semibold text-gray-800">
+                  <Users className="w-5 h-5 text-miracle-lightGrey" />
+                  <h2 className="text-xl font-semibold text-miracle-black">
                     Students ({students.length})
                   </h2>
                 </div>
@@ -119,11 +119,11 @@ export default function AdminGame() {
                   {students.map((player) => (
                     <div
                       key={player.id}
-                      className="bg-white p-4 rounded-lg shadow border border-gray-200"
+                      className="bg-miracle-white p-4 rounded-lg shadow border border-miracle-lightGrey/25"
                     >
                       <div className="flex justify-between items-center">
-                        <span className="font-medium text-gray-800">{player.name}</span>
-                        <span className="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm">
+                        <span className="font-medium text-miracle-black">{player.name}</span>
+                        <span className="bg-miracle-lightBlue/10 text-miracle-darkBlue px-3 py-1 rounded-full text-sm">
                           Score: {player.score}
                         </span>
                       </div>
