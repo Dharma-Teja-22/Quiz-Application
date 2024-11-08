@@ -66,23 +66,23 @@ export default function AdminGame() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      <div className="max-w-7xl mx-auto px-4 py-8">
+    <div className="min-h-screen bg-[#f5f5f5]">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <div className="space-y-6">
-            <div className="bg-miracle-white rounded-lg shadow-lg p-6">
-              <div className="flex justify-between items-center mb-8">
+            <div className="bg-[#ffffff] rounded-lg shadow-lg p-4 sm:p-6 border border-[#b7b2b3]/20">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 sm:mb-8 space-y-4 sm:space-y-0">
                 <div>
-                  <h1 className="text-2xl font-bold text-miracle-black">Game Control Panel</h1>
-                  <p className="text-gray-600">Game ID: {gameId}</p>
+                  <h1 className="text-2xl font-bold text-[#0d416b]">Game Control Panel</h1>
+                  <p className="text-[#8c8c8c]">Game ID: {gameId}</p>
                 </div>
-                <div className="flex items-center gap-4">
+                <div className="flex flex-wrap items-center gap-4">
                   {questions.length > 0 && (
                     <>
                       {gameStatus === 'playing' ? (
                         <button
                           onClick={() => handleGameControl('pause')}
-                          className="flex items-center gap-2 bg-miracle-darkBlue text-white px-4 py-2 rounded-lg hover:bg-miracle-mediumBlue"
+                          className="flex items-center gap-2 bg-[#2368a0] text-[#ffffff] px-4 py-2 rounded-lg hover:bg-[#0d416b] transition-colors duration-200"
                         >
                           <Pause className="w-5 h-5" />
                           Pause Game
@@ -90,7 +90,7 @@ export default function AdminGame() {
                       ) : (
                         <button
                           onClick={() => handleGameControl('start')}
-                          className="flex items-center gap-2 bg-miracle-lightBlue text-white px-4 py-2 rounded-lg hover:bg-miracle-lightBlue/80"
+                          className="flex items-center gap-2 bg-[#00aae7] text-[#ffffff] px-4 py-2 rounded-lg hover:bg-[#2368a0] transition-colors duration-200"
                         >
                           <Play className="w-5 h-5" />
                           Start Game
@@ -98,7 +98,7 @@ export default function AdminGame() {
                       )}
                       <button
                         onClick={() => handleGameControl('next')}
-                        className="flex items-center gap-2 bg-miracle-darkBlue text-white px-4 py-2 rounded-lg hover:bg-miracle-mediumBlue"
+                        className="flex items-center gap-2 bg-[#0d416b] text-[#ffffff] px-4 py-2 rounded-lg hover:bg-[#2368a0] transition-colors duration-200"
                       >
                         <SkipForward className="w-5 h-5" />
                         Next Question
@@ -108,22 +108,22 @@ export default function AdminGame() {
                 </div>
               </div>
 
-              <div className="bg-gray-50 rounded-lg p-6">
+              <div className="bg-[#f5f5f5] rounded-lg p-4 sm:p-6 border border-[#b7b2b3]/20">
                 <div className="flex items-center gap-2 mb-4">
-                  <Users className="w-5 h-5 text-miracle-lightGrey" />
-                  <h2 className="text-xl font-semibold text-miracle-black">
+                  <Users className="w-5 h-5 text-[#2368a0]" />
+                  <h2 className="text-xl font-semibold text-[#0d416b]">
                     Students ({students.length})
                   </h2>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {students.map((player) => (
                     <div
                       key={player.id}
-                      className="bg-miracle-white p-4 rounded-lg shadow border border-miracle-lightGrey/25"
+                      className="bg-[#ffffff] p-4 rounded-lg shadow border border-[#b7b2b3]/25"
                     >
                       <div className="flex justify-between items-center">
-                        <span className="font-medium text-miracle-black">{player.name}</span>
-                        <span className="bg-miracle-lightBlue/10 text-miracle-darkBlue px-3 py-1 rounded-full text-sm">
+                        <span className="font-medium text-[#232527]">{player.name}</span>
+                        <span className="bg-[#00aae7]/10 text-[#0d416b] px-3 py-1 rounded-full text-sm font-semibold">
                           Score: {player.score}
                         </span>
                       </div>
