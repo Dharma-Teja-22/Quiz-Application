@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useSocket } from '../context/SocketContext';
 import { Play, Pause, SkipForward, Users } from 'lucide-react';

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, X } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { useGameStore } from '../store/gameStore';
 
 export default function QuestionForm() {
