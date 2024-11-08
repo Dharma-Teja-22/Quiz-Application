@@ -30,9 +30,9 @@ export default function JoinGame() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#00aae7] to-[#0d416b] flex items-center justify-center p-4 sm:p-6 md:p-8">
+    <div className="min-h-screen bg-gradient-to-br from-[#0d416b] to-[#0d416b] flex items-center justify-center p-4 sm:p-6 md:p-8">
       <div className="w-full max-w-md space-y-8 bg-[#ffffff]/90 p-6 sm:p-8 rounded-xl shadow-lg backdrop-blur-sm">
-        <h1 className="text-2xl sm:text-3xl font-bold text-[#0d416b] mb-6">Join Quiz</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold text-[#0d416b] mb-2 justify-center flex">Join Quiz</h1>
         
         <form onSubmit={handleJoin} className="space-y-6">
           <div>

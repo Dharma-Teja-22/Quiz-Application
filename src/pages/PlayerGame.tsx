@@ -1,5 +1,5 @@
 import { Timer } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { useSocket } from '../context/SocketContext'
 import { useGameStore } from '../store/gameStore'
@@ -20,16 +20,44 @@ export default function PlayerGame() {
   const [isAnswerLocked, setIsAnswerLocked] = useState(false)
   const gameStatus = useGameStore((state) => state.gameStatus)
   const playerName = useGameStore((state) => state.playerName)
+  
+  const selectedAnswerRef = useRef(selectedAnswer);
+
 
   useEffect(() => {
-    if (!socket) return
+    selectedAnswerRef.current = selectedAnswer;
+  },[selectedAnswer])
 
-    socket.on('question', (question) => {
-      setCurrentQuestion(question)
-      setTimeLeft(20)
-      setSelectedAnswer(null)
-      setIsAnswerLocked(false)
-    })
+  useEffect(() => {
+    console.log("Game status:", gameStatus);
+    if (gameStatus === 'end') {
+      console.log("Game has ended.");
+    }
+  }, [gameStatus]);
+  
+  useEffect(() => {
+    if (!socket) return;
+
+    // socket.on('question', (question) => {
+    //   setCurrentQuestion(question)
+    //   setTimeLeft(20)
+    //   setSelectedAnswer(null)
+    //   setIsAnswerLocked(false)
+    // })
+
+    socket.on('question', (question,timeLeft,type) => {
+      if(type === "next"){
+        setSelectedAnswer(null);
+        setIsAnswerLocked(false);
+      }
+      else if(selectedAnswerRef.current === null){
+        setSelectedAnswer(null);
+        setIsAnswerLocked(false);
+      }
+      console.log("selectedAnswer : "+selectedAnswerRef.current)
+      setCurrentQuestion(question);
+      setTimeLeft(timeLeft);
+    });
 
     socket.on('timer', (time) => {
       setTimeLeft(time)
@@ -46,6 +74,9 @@ export default function PlayerGame() {
       useGameStore.getState().setGameStatus('playing')
     })
 
+    socket.on('game-ended', ()=>{
+      useGameStore.getState().setGameStatus('end')
+    })
     return () => {
       socket.off('question')
       socket.off('timer')
@@ -56,7 +87,7 @@ export default function PlayerGame() {
 
   const handleAnswerSelect = (answerIndex: number) => {
     console.log(answerIndex, isAnswerLocked, gameStatus)
-    if (isAnswerLocked || gameStatus !== 'playing') return
+    if (isAnswerLocked || gameStatus !== 'playing') return;
 
     setSelectedAnswer(answerIndex)
     setIsAnswerLocked(true)
@@ -68,7 +99,7 @@ export default function PlayerGame() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#00aae7] to-[#0d416b] p-4 sm:p-6 md:p-8">
+    <div className="min-h-screen bg-gradient-to-br from-[#0d416b] to-[#0d416b] p-4 sm:p-6 md:p-8">
       <div className="max-w-2xl mx-auto">
         <div className="bg-[#ffffff] rounded-lg shadow-lg p-4 sm:p-6 mb-4">
           <div className="flex flex-col sm:flex-row justify-between items-center mb-6">
@@ -78,15 +109,20 @@ export default function PlayerGame() {
             {gameStatus === 'playing' && (
               <div className="flex items-center gap-2 bg-[#00aae7]/20 px-4 py-2 rounded-full">
                 <Timer className="w-4 h-4 text-[#0d416b]" />
-                <span className="text-[#0d416b] font-medium">{timeLeft}s</span>
+                <span className="text-[#0d416b] font-medium">{timeLeft >= 0 ? timeLeft : 0}s</span>
               </div>
             )}
           </div>
-
+  
           {gameStatus === 'paused' ? (
             <div className="text-center py-8">
               <h3 className="text-xl font-semibold text-[#232527]">Game Paused</h3>
               <p className="text-[#8c8c8c]">Waiting for the host to resume...</p>
+            </div>
+          ) : gameStatus === 'end' ? (
+            <div className="text-center py-8">
+              <h3 className="text-xl font-semibold text-[#232527]">Thank you for joining the quiz</h3>
+              <p className="text-[#8c8c8c]">-- End --</p>
             </div>
           ) : currentQuestion ? (
             <>
@@ -121,4 +157,6 @@ export default function PlayerGame() {
       </div>
     </div>
   )
+  
 }
+

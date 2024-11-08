@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useSocket } from '../context/SocketContext';
-import { Play, Pause, SkipForward, Users } from 'lucide-react';
+import { Play, Pause, SkipForward, Users, Timer, X } from 'lucide-react';
 import { useGameStore } from '../store/gameStore';
 import QuestionForm from '../components/QuestionForm';
 import QuestionList from '../components/QuestionList';
@@ -19,6 +19,9 @@ export default function AdminGame() {
   const gameStatus = useGameStore((state) => state.gameStatus);
   const setGameStatus = useGameStore((state) => state.setGameStatus);
   const questions = useGameStore((state) => state.questions);
+  const [timeLeft, setTimeLeft] = useState<number>(20);
+
+  const countRef = useRef(0);
 
   useEffect(() => {
     if (!socket) return;
@@ -39,6 +42,11 @@ export default function AdminGame() {
       );
     });
 
+    socket.on('timer', (time) => {
+      console.log(time);
+      setTimeLeft(time);
+    });
+
     return () => {
       socket.off('player-joined');
       socket.off('player-left');
@@ -46,10 +54,8 @@ export default function AdminGame() {
     };
   }, [socket, gameId, questions]);
 
-  const handleGameControl = (action: 'start' | 'pause' | 'next') => {
-    console.log(questions.length,socket)
+  const handleGameControl = (action: 'start' | 'pause' | 'next' | 'end') => {
     if (!socket || questions.length === 0) return;
-
     switch (action) {
       case 'start':
         socket.emit('game-action', { gameId, action: 'start' });
@@ -61,6 +67,12 @@ export default function AdminGame() {
         break;
       case 'next':
         socket.emit('game-action', { gameId, action: 'next' });
+        countRef.current+=1;
+        break;
+      case 'end':
+        socket.emit('game-action', { gameId, action: 'end' });
+        setGameStatus('end');
+        // socket.emit('end', { message: "Quiz done successfully, Thank you" });
         break;
     }
   };
@@ -71,12 +83,14 @@ export default function AdminGame() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <div className="space-y-6">
             <div className="bg-[#ffffff] rounded-lg shadow-lg p-4 sm:p-6 border border-[#b7b2b3]/20">
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 sm:mb-8 space-y-4 sm:space-y-0">
+              
+            
+            <div className="flex flex-col sm:flex-row justify-between  items-start sm:items-center mb-6 sm:mb-8 space-y-4 sm:space-y-0">
                 <div>
-                  <h1 className="text-2xl font-bold text-[#0d416b]">Game Control Panel</h1>
-                  <p className="text-[#8c8c8c]">Game ID: {gameId}</p>
+                  <h1 className="text-2xl font-bold text-[#0d416b]">Quiz Control Panel</h1>
+                  <p className="text-[#8c8c8c]">Quiz ID: {gameId}</p>
                 </div>
-                <div className="flex flex-wrap items-center gap-4">
+                <div className="flex flex-wrap items-center gap-4  w-full md:w-fit ">
                   {questions.length > 0 && (
                     <>
                       {gameStatus === 'playing' ? (
@@ -96,25 +110,46 @@ export default function AdminGame() {
                           Start Game
                         </button>
                       )}
-                      <button
-                        onClick={() => handleGameControl('next')}
-                        className="flex items-center gap-2 bg-[#0d416b] text-[#ffffff] px-4 py-2 rounded-lg hover:bg-[#2368a0] transition-colors duration-200"
-                      >
-                        <SkipForward className="w-5 h-5" />
-                        Next Question
-                      </button>
+
+                      {
+                        countRef.current < questions.length    ? (
+                          <button
+                            onClick={() => handleGameControl('next')}
+                            className="flex items-center gap-2 bg-[#0d416b] text-[#ffffff] px-4 py-2 rounded-lg hover:bg-[#2368a0] transition-colors duration-200"
+                          >
+                            <SkipForward className="w-5 h-5" />
+                            Next Question
+                          </button>
+                        ) : (
+                          <button
+                            onClick={() => handleGameControl('end')}
+                            className="flex items-center gap-2 bg-miracle-red text-[#ffffff] px-4 py-2 rounded-lg hover:bg-miracle-red/80 transition-colors duration-200"
+                          >
+                            <X className="w-5 h-5" />
+                            End Quiz
+                          </button>
+                        )
+                      }
                     </>
                   )}
                 </div>
+
               </div>
 
-              <div className="bg-[#f5f5f5] rounded-lg p-4 sm:p-6 border border-[#b7b2b3]/20">
-                <div className="flex items-center gap-2 mb-4">
-                  <Users className="w-5 h-5 text-[#2368a0]" />
-                  <h2 className="text-xl font-semibold text-[#0d416b]">
-                    Students ({students.length})
-                  </h2>
+              <div className="bg-[#f5f5f5] rounded-lg p-6">
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6">
+                  <div className='flex gap-2 items-center'>
+                    <Users className="w-6 h-6 text-[#2368a0]" />
+                    <h2 className="text-xl font-semibold text-[#0d416b]">
+                      Students ({students.length})
+                    </h2>
+                  </div>
+                  <div className="flex items-center gap-2 bg-[#00aae7]/20 px-4 py-2 rounded-full">
+                    <Timer className="w-5 h-5 text-[#00aae7]" />
+                    <span className="text-[#0d416b] font-medium">{timeLeft >= 0 ? timeLeft : 0}s</span>
+                  </div>
                 </div>
+
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {students.map((player) => (
                     <div

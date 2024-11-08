@@ -8,7 +8,7 @@ export default function QuestionList() {
   if (questions.length === 0) {
     return (
       <div className="text-center py-8 bg-[#b7b2b3]/20 rounded-lg">
-        <p className="text-[#232527] font-semibold">No questions added yet. Add some questions to start the game!</p>
+        <p className="text-[#232527] font-semibold">No questions added yet. Add some questions to start the quiz!</p>
       </div>
     )
   }

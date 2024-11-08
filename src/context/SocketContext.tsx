@@ -15,7 +15,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const [socket, setSocket] = useState<Socket | null>(null);
 
   useEffect(() => {
-    const newSocket = io('localhost:3001');
+    const newSocket = io('172.17.10.126:3001');
     setSocket(newSocket);
 
     return () => {

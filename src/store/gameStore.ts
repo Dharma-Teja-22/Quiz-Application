@@ -13,14 +13,14 @@ interface GameState {
   isAdmin: boolean;
   currentQuestion: number;
   score: number;
-  gameStatus: 'waiting' | 'playing' | 'paused' | 'finished';
+  gameStatus: 'waiting' | 'playing' | 'paused' | 'end';
   questions: Question[];
   setGameId: (id: string) => void;
   setPlayerName: (name: string) => void;
   setIsAdmin: (isAdmin: boolean) => void;
   setCurrentQuestion: (questionNum: number) => void;
   updateScore: (points: number) => void;
-  setGameStatus: (status: 'waiting' | 'playing' | 'paused' | 'finished') => void;
+  setGameStatus: (status: 'waiting' | 'playing' | 'paused' | 'end') => void;
   addQuestion: (question: Omit<Question, 'id'>) => void;
   removeQuestion: (id: number) => void;
   setQuestions: (questions: Question[]) => void;
