@@ -67,7 +67,7 @@ export default function AdminGame() {
         break;
       case 'next':
         socket.emit('game-action', { gameId, action: 'next' });
-        countRef.current+=1;
+        countRef.current += 1;
         break;
       case 'end':
         socket.emit('game-action', { gameId, action: 'end' });
@@ -83,9 +83,9 @@ export default function AdminGame() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <div className="space-y-6">
             <div className="bg-[#ffffff] rounded-lg shadow-lg p-4 sm:p-6 border border-[#b7b2b3]/20">
-              
-            
-            <div className="flex flex-col sm:flex-row justify-between  items-start sm:items-center mb-6 sm:mb-8 space-y-4 sm:space-y-0">
+
+
+              <div className="flex flex-col sm:flex-row justify-between  items-start sm:items-center mb-6 sm:mb-8 space-y-4 sm:space-y-0">
                 <div>
                   <h1 className="text-2xl font-bold text-[#0d416b]">Quiz Control Panel</h1>
                   <p className="text-[#8c8c8c]">Quiz ID: {gameId}</p>
@@ -93,43 +93,43 @@ export default function AdminGame() {
                 <div className="flex flex-wrap items-center gap-4  w-full md:w-fit ">
                   {questions.length > 0 && (
                     <>
-                      {gameStatus === 'playing' ? (
-                        <button
-                          onClick={() => handleGameControl('pause')}
-                          className="flex items-center gap-2 bg-[#2368a0] text-[#ffffff] px-4 py-2 rounded-lg hover:bg-[#0d416b] transition-colors duration-200"
-                        >
-                          <Pause className="w-5 h-5" />
-                          Pause Game
-                        </button>
-                      ) : (
-                        <button
-                          onClick={() => handleGameControl('start')}
-                          className="flex items-center gap-2 bg-[#00aae7] text-[#ffffff] px-4 py-2 rounded-lg hover:bg-[#2368a0] transition-colors duration-200"
-                        >
-                          <Play className="w-5 h-5" />
-                          Start Game
-                        </button>
-                      )}
-
                       {
-                        countRef.current < questions.length    ? (
+                        gameStatus === 'playing' ? (
                           <button
-                            onClick={() => handleGameControl('next')}
-                            className="flex items-center gap-2 bg-[#0d416b] text-[#ffffff] px-4 py-2 rounded-lg hover:bg-[#2368a0] transition-colors duration-200"
+                            onClick={() => handleGameControl('pause')}
+                            className="flex items-center gap-2 bg-[#2368a0] text-[#ffffff] px-4 py-2 rounded-lg hover:bg-[#0d416b] transition-colors duration-200"
                           >
-                            <SkipForward className="w-5 h-5" />
-                            Next Question
+                            <Pause className="w-5 h-5" />
+                            Pause Game
                           </button>
                         ) : (
                           <button
-                            onClick={() => handleGameControl('end')}
-                            className="flex items-center gap-2 bg-miracle-red text-[#ffffff] px-4 py-2 rounded-lg hover:bg-miracle-red/80 transition-colors duration-200"
+                            onClick={() => handleGameControl('start')}
+                            className="flex items-center gap-2 bg-[#00aae7] text-[#ffffff] px-4 py-2 rounded-lg hover:bg-[#2368a0] transition-colors duration-200"
                           >
-                            <X className="w-5 h-5" />
-                            End Quiz
+                            <Play className="w-5 h-5" />
+                            Start Game
                           </button>
                         )
                       }
+
+                      {countRef.current < questions.length - 1 ? (
+                        <button
+                          onClick={() => handleGameControl('next')}
+                          className="flex items-center gap-2 bg-[#0d416b] text-[#ffffff] px-4 py-2 rounded-lg hover:bg-[#2368a0] transition-colors duration-200 "
+                        >
+                          <SkipForward className="w-5 h-5" />
+                          Next Question
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => handleGameControl('end')}
+                          className="flex items-center gap-2 bg-red-500 text-[#ffffff] px-4 py-2 rounded-lg hover:bg-miracle-red/70  transition-colors duration-200 "
+                        >
+                          <X className="w-5 h-5" />
+                          End Quiz
+                        </button>
+                      )}
                     </>
                   )}
                 </div>
