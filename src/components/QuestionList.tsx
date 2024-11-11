@@ -1,14 +1,14 @@
 import { Trash2 } from 'lucide-react';
 import { useGameStore } from '../store/gameStore';
 
-export default function QuestionList() {
+export default function QuestionList({currentQuestionIndex} : {currentQuestionIndex : number}) {
   const questions = useGameStore((state) => state.questions);
   const removeQuestion = useGameStore((state) => state.removeQuestion);
 
   if (questions.length === 0) {
     return (
       <div className="text-center py-8 rounded-xl h-full w-full flex justify-center items-center">
-        <div className="text-miracle-white font-bold sm:text-base">
+        <div className="text-miracle-darkGrey font-bold sm:text-base">
           No questions added yet. <br /> Add some questions to start the game!
         </div>
       </div>
@@ -25,10 +25,10 @@ export default function QuestionList() {
           <div className="flex flex-col gap-4">
             <div className="flex items-start justify-between gap-4">
               <div className="flex gap-3 flex-1">
-                <span className="flex-shrink-0 w-8 h-8 rounded-full bg-[#00aae7]/20 flex items-center justify-center text-miracle-white font-semibold">
+                <span className={`flex-shrink-0 w-8 h-8 rounded-full ${currentQuestionIndex === index && "bg-miracle-darkBlue"} bg-[#00aae7] flex items-center justify-center text-miracle-white font-semibold`}>
                   {index + 1}
                 </span>
-                <h4 className="font-semibold text-miracle-white text-lg leading-tight pt-1">
+                <h4 className="font-semibold text-miracle-black text-lg leading-tight pt-1">
                   {question.question}
                 </h4>
               </div>
@@ -44,15 +44,15 @@ export default function QuestionList() {
               {question.options.map((option, optIndex) => (
                 <div
                   key={optIndex}
-                  className={`relative  p-4 rounded-xl transition-all duration-200 ${
+                  className={`relative p-2 rounded-xl transition-all duration-200 bg-[#00aae7]/5 text-miracle-black ${
                     optIndex === question.correctAnswer
-                      ? 'bg-[#00aae7]/20 text-miracle-white ring-2 ring-[#00aae7]/50'
-                      : 'bg-[#00aae7]/20 text-miracle-white/80 hover:bg-[#f5f5f5]/80'
+                      ? 'ring-2 ring-[#00aae7]/50'
+                      : 'ring-2 ring-[#00aae7]/20'
                   }`}
                 >
                   <div className="flex items-center gap-3">
-                    <span className="flex-shrink-0 w-6 h-6 rounded-full bg-[#ffffff] flex items-center justify-center text-sm font-medium text-[#8c8c8c]">
-                      {String.fromCharCode(65 + optIndex)}
+                    <span className="flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-sm font-medium text-miracle-black">
+                      {String.fromCharCode(65 + optIndex)+"."}
                     </span>
                     <span className={`${
                       optIndex === question.correctAnswer ? 'font-medium' : ''
@@ -61,7 +61,7 @@ export default function QuestionList() {
                     </span>
                   </div>
                   {optIndex === question.correctAnswer && (
-                    <span className="absolute top-2 right-2 text-xs font-medium text-white">
+                    <span className="absolute top-2 right-2 text-xs font-medium text-black">
                       Correct Answer
                     </span>
                   )}

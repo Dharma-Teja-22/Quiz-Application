@@ -1,11 +1,12 @@
-import React, { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 // import { useSocket } from '../context/SocketContext';
-import { Play, Pause, SkipForward, Users, Timer } from 'lucide-react';
+import { Play, Pause, SkipForward, Users, Timer, Ban } from 'lucide-react';
 import { useGameStore } from '../store/gameStore';
 import QuestionForm from '../components/QuestionForm';
 import QuestionList from '../components/QuestionList';
 import { SocketContext } from '../context/SocketContext';
+import { useNavigate } from 'react-router-dom';
 
 
 interface Player {
@@ -22,9 +23,13 @@ export default function AdminGame() {
   const setGameStatus = useGameStore((state) => state.setGameStatus);
   const questions = useGameStore((state) => state.questions);
   const [timeLeft, setTimeLeft] = useState<number>(20);
+  const countRef = useRef<number>(0);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (!socket) return;
+
+    socket.emit('create-game', { gameId, questions });
 
     socket.on('player-joined', (playerData) => {
       setStudents((current) => [...current, playerData]);
@@ -38,6 +43,7 @@ export default function AdminGame() {
       console.log("updated score")
       setStudents((current) =>
         current.map(p => p.id === playerId ? { ...p, score: newScore } : p)
+        .sort((a, b) => b.score - a.score)
       );
     });
 
@@ -53,7 +59,7 @@ export default function AdminGame() {
     };
   }, [socket, gameId, questions]);
 
-  const handleGameControl = (action: 'start' | 'pause' | 'next') => {
+  const handleGameControl = (action: 'start' | 'pause' | 'next' | 'end') => {
     console.log(questions.length,socket)
     if (!socket || questions.length === 0) return;
 
@@ -67,48 +73,64 @@ export default function AdminGame() {
         setGameStatus('paused');
         break;
       case 'next':
+        countRef.current+=1;
         socket.emit('game-action', { gameId, action: 'next' });
+        break;
+      case 'end':
+        socket.emit('game-action', { gameId, action: 'end' });
+        navigate('/')
         break;
     }
   };
 
   return (
-    <div className='h-screen bg-gradient-to-br from-miracle-darkBlue to-miracle-black '>
-          <div className="overflow-auto w-full h-full lg:grid bg-opacity-10 backdrop-blur-lg backdrop-filter mx-auto lg:grid-rows-12 lg:grid-cols-12 gap-5 p-2 xl:p-8 rounded-xl">
+    <div className='min-h-full bg-[#EEF7FF]'>
+          <div className="overflow-auto w-full h-full lg:grid mx-auto lg:grid-rows-12 lg:grid-cols-12 gap-3 p-2">
 
-            <div className="h-fit max-h-[500px] md:max-h-full mb-3 md:row-start-1 md:row-end-7 md:col-start-1 md:col-end-7 md:grid md:grid-rows-10 p-2 xl:p-5 rounded-xl bg-opacity-10 backdrop-blur-lg backdrop-filter shadow-xl bg-slate-100">
+            <div className="h-fit bg-white max-h-[500px] md:max-h-full mb-3 md:row-start-1 md:row-end-7 md:col-start-1 md:col-end-7 md:grid md:grid-rows-10 p-2 xl:p-5 rounded-lg border border-gray-200 shadow-lg">
               <div className="flex flex-col md:flex-row justify-between items-start sm:items-center gap-4 mb-3 row-span-2">
                 <div>
-                  <h1 className="text-2xl font-bold text-miracle-white">Game Control Panel</h1>
-                  <p className="text-miracle-lightGrey">Game ID: {gameId}</p>
+                  <h1 className="text-2xl font-bold text-miracle-darkBlue">Quiz Control Panel</h1>
+                  <p className="text-miracle-darkGrey">Game ID: {gameId}</p>
                 </div>
                 <div className="flex items-start h-full gap-2">
-                  {questions.length > 0 && (
+                  {questions.length > 0 &&  (
                     <>
                       {gameStatus === 'playing' ? (
                         <button
                           onClick={() => handleGameControl('pause')}
-                          className="flex items-center gap-2 bg-miracle-red/80 text-[#ffffff] px-2 py-2 rounded-full hover:bg-[#ef4048]/90 transition-all duration-200 shadow-md"
+                          className="flex items-center gap-2 bg-miracle-darkGrey text-[#ffffff] px-2 py-2 rounded-lg hover:bg-miracle-darkGrey/90 transition-all duration-200 shadow-md"
                         >
                           <Pause className="w-5 h-5" />
-                          Pause Game
+                          Pause Quiz
                         </button>
                       ) : (
                         <button
                           onClick={() => handleGameControl('start')}
-                          className="flex items-center gap-2 bg-[#00aae7] text-[#ffffff] px-2 py-2 rounded-full hover:bg-[#00aae7]/90 transition-all duration-200 shadow-md"
+                          className="flex items-center gap-2 bg-[#00aae7] text-[#ffffff] px-2 py-2 rounded-lg hover:bg-[#00aae7]/90 transition-all duration-200 shadow-md"
                         >
                           <Play className="w-5 h-5" />
-                          Start Game
+                          Start Quiz
                         </button>
                       )}
-                      <button
-                        onClick={() => handleGameControl('next')}
-                        className="flex items-center gap-2 bg-[#2368a0] text-[#ffffff] px-3 py-2 rounded-full hover:bg-[#2368a0]/90 transition-all duration-200 shadow-md"
-                      >
-                        <SkipForward className="w-5 h-5" />
-                        Next Question
-                      </button>
+                      {
+                        countRef.current !== questions.length - 1
+                        ? <button
+                            onClick={() => handleGameControl('next')}
+                            className="flex items-center gap-2 bg-[#2368a0] text-[#ffffff] px-3 py-2 rounded-lg hover:bg-[#2368a0]/90 transition-all duration-200 shadow-md"
+                          >
+                            <SkipForward className="w-5 h-5" />
+                            Next Question
+                          </button>
+                        : <button
+                            onClick={() => handleGameControl('end')}
+                            className="flex items-center gap-2 bg-miracle-red/80 text-[#ffffff] px-3 py-2 rounded-lg hover:bg-miracle-red/90 transition-all duration-200 shadow-md"
+                          >
+                            <Ban className="w-5 h-5" />
+                            End Quiz
+                          </button>
+                      }
+                      
                     </>
                   )}
                 </div>
@@ -116,12 +138,12 @@ export default function AdminGame() {
               <div className="rounded-lg row-span-8 overflow-hidden p-2 px-0">
                 <div className="flex flex-row items-center justify-between gap-4 mb-2">
                   <div className='flex gap-2 items-center'>
-                    <Users className="w-5 h-5 text-miracle-white" />
-                    <h2 className="text-md font-semibold text-miracle-white">
+                    <Users className="w-5 h-5 text-miracle-black" />
+                    <h2 className="text-md font-semibold text-miracle-black">
                       Students ({students.length})
                     </h2>
                   </div>
-                  <div className="flex items-center gap-2 bg-miracle-lightBlue/55 px-4 py-2 rounded-full">
+                  <div className="flex items-center gap-2 bg-miracle-lightBlue px-4 py-2 rounded-full">
                     <Timer className="w-5 h-5 text-miracle-white" />
                     <span className="text-miracle-white font-medium">{timeLeft}s</span>
                   </div>
@@ -131,17 +153,17 @@ export default function AdminGame() {
                     {students.map((player) => (
                       <div
                         key={player.id}
-                        className="bg-[#ffffff] bg-opacity-10 backdrop-blur-lg backdrop-filter rounded-xl py-2 px-1 transition-all duration-200 hover:shadow-lg max-h-[70px]"
+                        className="bg-white rounded-lg py-2 px-1 transition-all duration-200 border border-gray-200 shadow-lg max-h-[70px]"
                       >
                         <div className="flex items-start gap-3">
-                          <div className="bg-miracle-lightBlue/55 p-2 rounded-full">
+                          <div className="bg-miracle-lightBlue p-2 rounded-full">
                             <Users className="w-5 h-5 text-miracle-white" />
                           </div>
                           <div className="flex-1">
-                            <h3 className="font-medium text-miracle-white">{player.name}</h3>
+                            <h3 className="font-medium text-miracle-black">{player.name.charAt(0).toLocaleUpperCase() + player.name.substring(1)}</h3>
                             <div className="flex items-center mt-1">
-                              <span className="text-[#d3d3d3] text-sm">Score:</span>
-                              <span className="text-miracle-white px-2 rounded-full text-sm font-medium">
+                              <span className="text-black text-sm">Score:</span>
+                              <span className="text-miracle-black px-2 rounded-full text-sm font-medium">
                                 {player.score}
                               </span>
                             </div>
@@ -150,15 +172,15 @@ export default function AdminGame() {
                       </div>
                     ))}
                   </div>
-                ) : <div className='flex justify-center h-[90%] text-miracle-lightGrey items-center'>Waiting for Students to join...</div> }
+                ) : <div className='flex justify-center h-[90%] text-miracle-darkGrey font-bold items-center'>Waiting for Students to join...</div> }
               </div>
             </div>
 
-            <div className="h-fit md:h-full mb-3 md:row-start-7 md:row-end-13 md:col-start-1 md:col-end-7 overflow-auto p-2 xl:p-5 rounded-xl bg-opacity-10 backdrop-blur-lg backdrop-filter shadow-xl bg-slate-100">
+            <div className="h-fit md:h-full mb-3 md:row-start-7 md:row-end-13 md:col-start-1 md:col-end-7 overflow-auto p-2 xl:p-5 rounded-lg border border-gray-200 bg-white shadow-lg">
               <QuestionForm />
             </div>
-            <div className='h-full max-h-[500px] md:max-h-full md:row-span-full md:col-start-7 md:col-end-13 overflow-scroll no-scrollbar pb-2 rounded-xl bg-opacity-10 backdrop-blur-lg backdrop-filter shadow-xl bg-slate-100'>
-              <QuestionList />
+            <div className='h-full max-h-[500px] md:max-h-full md:row-span-full md:col-start-7 md:col-end-13 overflow-scroll no-scrollbar pb-2 border rounded-lg border-gray-200 bg-white shadow-lg'>
+              <QuestionList currentQuestionIndex={countRef.current} />
             </div>
           </div>
     </div>

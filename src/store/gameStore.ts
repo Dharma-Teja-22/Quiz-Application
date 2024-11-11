@@ -46,5 +46,6 @@ export const useGameStore = create<GameState>((set) => ({
   removeQuestion: (id) => set((state) => ({
     questions: state.questions.filter(q => q.id !== id)
   })),
-  setQuestions: (questions) => set({ questions })
+  setQuestions: (questions) => set({ questions }),
+  
 }));

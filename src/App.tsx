@@ -5,18 +5,13 @@ import AdminGame from './pages/AdminGame';
 import PlayerGame from './pages/PlayerGame';
 import JoinGame from './pages/JoinGame';
 import { SocketProvider } from './context/SocketContext';
+import Layout from './layout/Layout';
 
 function App() {
   return (
     <BrowserRouter>
       <SocketProvider>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/create" element={<CreateGame />} />
-          <Route path="/admin/:gameId" element={<AdminGame />} />
-          <Route path="/play/:gameId" element={<PlayerGame />} />
-          <Route path="/join" element={<JoinGame />} />
-        </Routes>
+        <Layout />
       </SocketProvider>
     </BrowserRouter>
   );

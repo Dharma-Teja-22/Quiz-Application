@@ -46,6 +46,10 @@ export default function PlayerGame() {
       setTimeLeft(timeLeft);
     });
 
+    socket.on('end',() => {
+      useGameStore.getState().setGameStatus('finished');
+    })
+
     socket.on('timer', (time) => {
       setTimeLeft(time);
     });
@@ -84,16 +88,16 @@ export default function PlayerGame() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-miracle-darkBlue to-miracle-black p-4">
-      <div className="max-w-2xl mx-auto">
-        <div className="bg-opacity-10 backdrop-blur-lg backdrop-filter bg-miracle-white rounded-xl shadow-lg p-6 mb-4">
+    <div className="min-h-full bg-[#EEF7FF] flex items-center justify-center  ">
+      <div className="max-w-2xl w-[90%]">
+        <div className="bg-miracle-white rounded-lg border border-gray-200 shadow-xl p-6 mb-4">
           <div className="flex justify-between items-center mb-6">
             <div>
-              <h2 className="text-lg font-semibold text-miracle-white">{playerName}</h2>
+              <h2 className="text-xl font-semibold text-miracle-darkBlue">{playerName.charAt(0).toLocaleUpperCase() + playerName.substring(1)}</h2>
             
             </div>
             {gameStatus === 'playing' && (
-              <div className="flex items-center gap-2 bg-miracle-lightBlue/55 px-4 py-2 rounded-full">
+              <div className="flex items-center gap-2 bg-miracle-lightBlue px-4 py-2 rounded-full">
                 <Timer className="w-4 h-4 text-miracle-white" />
                 <span className="text-miracle-white font-medium">{timeLeft}s</span>
               </div>
@@ -102,12 +106,12 @@ export default function PlayerGame() {
 
           {gameStatus === 'paused' ? (
             <div className="text-center py-8">
-              <h3 className="text-xl font-semibold text-miracle-white">Game Paused</h3>
-              <p className="text-miracle-white">Waiting for the host to resume...</p>
+              <h3 className="text-xl font-semibold text-miracle-darkGrey">Quiz Paused</h3>
+              <p className="text-miracle-darkGrey">Waiting for the host to resume...</p>
             </div>
-          ) : currentQuestion ? (
+          ) : currentQuestion && timeLeft !== 0 ? (
             <>
-              <h3 className="text-xl font-semibold text-miracle-white mb-6">
+              <h3 className="text-xl font-semibold text-miracle-black mb-6">
                 {currentQuestion.question}
               </h3>
               <div className="grid md:grid-cols-2 grid-cols-1 gap-4">
@@ -115,12 +119,12 @@ export default function PlayerGame() {
                   <button
                     key={index}
                     onClick={() => handleAnswerSelect(index)}
-                    className={`p-4 text-left transition-all text-white rounded-full ${
+                    className={`p-4 text-left transition-all rounded-lg ${
                       selectedAnswerRef.current === index
-                        ? 'bg-miracle-lightBlue'
-                        : 'bg-[#00aae7]/20 hover:bg-[#00aae7]/40 ring-2 ring-[#00aae7]/50'
-                    } ${isAnswerLocked ? 'cursor-not-allowed' : 'cursor-pointer'}`}
-                    disabled={isAnswerLocked}
+                        ? 'bg-miracle-lightBlue text-white'
+                        : 'ring-2 ring-[#00aae7]/50 text-black bg-[#00aae7]/5'
+                    } ${(isAnswerLocked || timeLeft === 0) ? 'cursor-not-allowed' : 'cursor-pointer'}`}
+                    disabled={isAnswerLocked || timeLeft === 0}
                   >
                     {option}
                   </button>
@@ -130,7 +134,9 @@ export default function PlayerGame() {
           ) : (
             <div className="text-center py-8">
               <h3 className="text-xl font-semibold text-miracle-lightGrey">
-                Waiting for the next question...
+                {
+                  gameStatus === 'finished' ? <h2>Quiz completed <br/>  Thanks for participating</h2> : "Waiting for the next question..."
+                }
               </h3>
             </div>
           )}

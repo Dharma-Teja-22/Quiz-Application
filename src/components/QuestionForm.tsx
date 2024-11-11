@@ -31,11 +31,11 @@ export default function QuestionForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="rounded-xl p-2 h-full w-full">
-      <h3 className="text-2xl font-bold text-miracle-white mb-2">Add New Question</h3>
+    <form onSubmit={handleSubmit} className="rounded-xl h-full w-full">
+      <h3 className="text-2xl font-bold text-miracle-darkBlue mb-2">Add New Question</h3>
       
       <div className="mb-2">
-        <label htmlFor="question" className="block text-sm font-medium text-miracle-white mb-2">
+        <label htmlFor="question" className="block text-sm font-medium text-miracle-black mb-2">
           Question
         </label>
         <input
@@ -43,14 +43,14 @@ export default function QuestionForm() {
           id="question"
           value={question}
           onChange={(e) => setQuestion(e.target.value)}
-          className="ring-2 text-miracle-white ring-[#00aae7]/50 bg-[#00aae7]/20 w-full px-4 py-2 rounded-full focus:ring-0 outline-slate-400 focus:ring-none focus:border-transparent transition-all duration-200"
+          className="ring-2 text-miracle-black ring-[#00aae7]/50 bg-[#00aae7]/5 w-full px-4 py-2 rounded-lg focus:ring-0 outline-miracle-mediumBlue focus:ring-none focus:border-transparent transition-all duration-200"
           placeholder="Enter your question"
           required
         />
       </div>
 
       <div className="mb-2">
-        <label className="block text-sm font-medium text-miracle-white mb-2">
+        <label className="block text-sm font-medium text-miracle-black mb-2">
           Options
         </label>
         <div className="grid grid-cols-2 gap-5 mb-4">
@@ -69,7 +69,7 @@ export default function QuestionForm() {
                   type="text"
                   value={option}
                   onChange={(e) => handleOptionChange(index, e.target.value)}
-                  className="text-miracle-white w-full pl-4 pr-10 py-2 ring-2 ring-[#00aae7]/50 bg-[#00aae7]/20 rounded-full outline-slate-400 focus:ring-0 focus:ring-none focus:border-transparent transition-all duration-200"
+                  className="text-miracle-black w-full pl-4 pr-10 py-2 ring-2 ring-[#00aae7]/50 bg-[#00aae7]/5 rounded-lg outline-miracle-mediumBlue focus:ring-0 focus:ring-none focus:border-transparent transition-all duration-200"
                   placeholder={`Option ${index + 1}`}
                   required
                 />
@@ -80,7 +80,7 @@ export default function QuestionForm() {
                     className="absolute right-2 top-1/2 transform -translate-y-1/2 text-[#8c8c8c] hover:text-[#ef4048] transition-colors duration-200"
                     aria-label="Clear option"
                   >
-                    <X className="w-5 h-5" />
+                    <X className="w-5 h-5 text-miracle-red" />
                   </button>
                 )}
               </div>
@@ -91,7 +91,7 @@ export default function QuestionForm() {
         <div className='flex justify-end'>
           <button
                   type="submit"
-                  className="flex items-center justify-center w-full sm:w-auto gap-2 bg-miracle-lightBlue/55 text-[#ffffff] px-3 py-2 rounded-full hover:bg-[#00aae7]/90 transition-all duration-200 shadow-md"
+                  className="flex items-center justify-center w-full sm:w-auto gap-2 bg-miracle-lightBlue text-[#ffffff] px-3 py-2 rounded-lg hover:bg-[#00aae7]/90 transition-all duration-200 shadow-md"
                 >
                   <Plus className="w-5 h-5" />
                   Add Question

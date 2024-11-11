@@ -80,6 +80,10 @@ io.on('connection', (socket) => {
           endGame(gameId);
         }
         break;
+      case 'end':
+        io.to(gameId).emit("end")
+        games.clear();
+        break;
     }
   });
 
@@ -128,7 +132,7 @@ function startQuestion(gameId,type) {
   if (game.timer) clearInterval(game.timer);
 
   game.timer = setInterval(() => {
-    timeLeft--;
+    if(timeLeft > 0) timeLeft--;
     game.timerVal = timeLeft;
     io.to(gameId).emit('timer', timeLeft);
     io.to(game.host).emit('timer', timeLeft);

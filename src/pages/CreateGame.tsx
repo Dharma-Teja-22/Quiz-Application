@@ -22,14 +22,14 @@ export default function CreateGame() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-miracle-darkBlue to-miracle-black flex items-center justify-center p-4">
-      <div className="max-w-md w-full rounded-xl p-8 border border-gray-500 bg-miracle-darkBlue bg-opacity-10 backdrop-blur-lg backdrop-filter ">
-        <h1 className="text-2xl font-bold text-miracle-lightBlue mb-6">Create New Game</h1>
+    <div className="min-h-full bg-[#EEF7FF] flex items-center justify-center p-4">
+      <div className="max-w-md w-full bg-white rounded-lg p-8 shadow-xl border border-gray-200">
+        <h1 className="text-2xl font-bold text-miracle-darkBlue mb-6">Create New Quiz</h1>
         
         <form onSubmit={handleCreate} className="space-y-6">
           <div>
-            <label htmlFor="gameId" className="block text-sm font-medium text-miracle-white/60 mb-1">
-              Game ID
+            <label htmlFor="gameId" className="block text-sm font-medium text-miracle-darkGrey mb-1">
+              Quiz ID
             </label>
             <input
               type="text"
@@ -39,8 +39,8 @@ export default function CreateGame() {
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
               placeholder="Enter a unique game ID"
             />
-            <p className="mt-1 text-sm text-miracle-white/60">
-              This ID will be used by students to join your game
+            <p className="mt-1 text-sm text-miracle-darkGrey">
+              This ID will be used by students to join your Quiz
             </p>
           </div>
 
@@ -52,7 +52,7 @@ export default function CreateGame() {
             type="submit"
             className="w-full flex items-center justify-center gap-2 bg-miracle-darkBlue text-white py-3 rounded-lg font-semibold hover:bg-miracle-darkBlue/70 transition-colors"
           >
-            Create Game
+            Create Quiz
             <ArrowRight className="w-5 h-5" />
           </button>
         </form>
