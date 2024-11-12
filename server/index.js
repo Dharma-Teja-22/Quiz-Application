@@ -1,24 +1,30 @@
 import { createServer } from 'http';
 import { Server } from 'socket.io';
 import { fileURLToPath } from 'url';
-import { dirname, join } from 'path';
+import { dirname } from 'path';
+import express from "express"
+import { addQuestion } from './controller/excel.controller.js';
+import multer from 'multer'
+
+const app = express()
+app.use(express.json())
+const upload = multer({ dest: 'uploads/' });
 
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+// const __dirname = dirname(__filename); // Removed unused variable
 
-const httpServer = createServer();
+const httpServer = createServer(app);
 const io = new Server(httpServer, {
   cors: {
-    origin:"*",
+    origin: "*",
     methods: ["GET", "POST"]
   }
 });
 
-const games = new Map();
+export const games = new Map();
 
 io.on('connection', (socket) => {
   console.log('User connected:', socket.id);
-
   socket.on('create-game', ({ gameId, questions }) => {
     games.set(gameId, {
       host: socket.id,
@@ -26,8 +32,7 @@ io.on('connection', (socket) => {
       questions: questions || [],
       currentQuestion: 0,
       status: 'waiting',
-      timer: null,
-      timerVal : 20
+      timer: null
     });
     socket.join(gameId);
     console.log(`Game created: ${gameId}`);
@@ -35,7 +40,7 @@ io.on('connection', (socket) => {
 
   socket.on('join-game', ({ gameId, playerName }, callback) => {
     const game = games.get(gameId);
-    
+
     if (!game) {
       callback({ success: false, error: 'Game not found' });
       return;
@@ -59,11 +64,12 @@ io.on('connection', (socket) => {
   socket.on('game-action', ({ gameId, action }) => {
     const game = games.get(gameId);
     if (!game || game.host !== socket.id) return;
+
     switch (action) {
       case 'start':
         game.status = 'playing';
         io.to(gameId).emit('game-started');
-        startQuestion(gameId,"start");
+        startQuestion(gameId);
         break;
       case 'pause':
         game.status = 'paused';
@@ -74,21 +80,15 @@ io.on('connection', (socket) => {
       case 'next':
         game.currentQuestion++;
         if (game.currentQuestion < game.questions.length) {
-          game.timerVal = 20;
-          startQuestion(gameId,"next");
+          startQuestion(gameId);
         } else {
           endGame(gameId);
         }
-        break;
-      case 'end':
-        io.to(gameId).emit("end")
-        games.clear();
         break;
     }
   });
 
   socket.on('submit-answer', ({ gameId, questionId, answer }) => {
-    console.log("answer recieved");
     const game = games.get(gameId);
     if (!game || game.status !== 'playing') return;
 
@@ -96,9 +96,8 @@ io.on('connection', (socket) => {
     if (!player) return;
 
     const question = game.questions[game.currentQuestion];
-    console.log(question.id,questionId)
     if (question.id !== questionId) return;
-    console.log(answer,question)
+    console.log(answer, question)
     if (answer === question.correctAnswer) {
       player.score += 100;
       io.to(game.host).emit('score-update', {
@@ -121,23 +120,23 @@ io.on('connection', (socket) => {
   });
 });
 
-function startQuestion(gameId,type) {
+function startQuestion(gameId) {
   const game = games.get(gameId);
   if (!game) return;
 
   const question = game.questions[game.currentQuestion];
-  io.to(gameId).emit('question', question,game.timeLeft,type);
+  io.to(gameId).emit('question', question);
 
-  let timeLeft = game.timerVal;
+  let timeLeft = 20;
   if (game.timer) clearInterval(game.timer);
 
   game.timer = setInterval(() => {
-    if(timeLeft > 0) timeLeft--;
-    game.timerVal = timeLeft;
+    timeLeft--;
     io.to(gameId).emit('timer', timeLeft);
-    io.to(game.host).emit('timer', timeLeft);
+
     if (timeLeft <= 0) {
       clearInterval(game.timer);
+      // Move to next question or end game
     }
   }, 1000);
 }
@@ -158,6 +157,16 @@ function endGame(gameId) {
   io.to(gameId).emit('game-ended', { results });
   games.delete(gameId);
 }
+
+app.get('/', (req, res) => {
+  console.log("hitted check");
+  res.send("working");
+});
+
+app.post('/add-question', upload.single('file'), (req, res) => {
+  addQuestion(req, res);
+});
+
 
 const PORT = process.env.PORT || 3001;
 httpServer.listen(PORT, () => {

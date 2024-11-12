@@ -1,0 +1,55 @@
+{
+  "gameId": "1234",
+  "questions": [
+    {
+      "question": "What is the capital of France?",
+      "options": [
+        "Paris",
+        "Berlin",
+        "Madrid",
+        "Rome"
+      ],
+      "answer": 1
+    },
+    {
+      "question": "Which planet is known as the Red Planet?",
+      "options": [
+        "Earth",
+        "Mars",
+        "Jupiter",
+        "Venus"
+      ],
+      "answer": 2
+    },
+    {
+      "question": "Who wrote \"To be, or not to be\"?",
+      "options": [
+        "Dickens",
+        "Shakespeare",
+        "Tolstoy",
+        "Hemingway"
+      ],
+      "answer": 3
+    },
+    {
+      "question": "What is the largest mammal?",
+      "options": [
+        "Elephant",
+        "Whale",
+        "Shark",
+        "Dolphin"
+      ],
+      "answer": 2
+    },
+    {
+      "question": "How many continents are there?",
+      "options": [
+        5,
+        6,
+        7,
+        8
+      ],
+      "answer": 4
+    }
+  ]
+}
