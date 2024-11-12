@@ -1,7 +1,5 @@
 import { createServer } from 'http';
 import { Server } from 'socket.io';
-import { fileURLToPath } from 'url';
-import { dirname } from 'path';
 import express from "express"
 import { addQuestion } from './controller/excel.controller.js';
 import multer from 'multer'
@@ -10,8 +8,6 @@ const app = express()
 app.use(express.json())
 const upload = multer({ dest: 'uploads/' });
 
-const __filename = fileURLToPath(import.meta.url);
-// const __dirname = dirname(__filename); // Removed unused variable
 
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
