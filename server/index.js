@@ -185,11 +185,18 @@ app.post("/api/upload-excel", upload.single("file"), (req, res) => {
     const allData = sheets.flatMap((sheetName) =>
       xlsx.utils.sheet_to_json(workbook.Sheets[sheetName])
     );
-
+    console.log(allData);
+    const allDataNew = allData.map((item) => {
+      return {
+        Question: item.Question,
+        options: [item.option1, item.option2, item.option3, item.option4],
+        answer: item.answer - 1, // Adjust answer to zero-based index
+      };
+    });
     // Use gameId as the key in the JSON response
     quizData = {
       ...quizData,
-      [req.query.gameId]: allData,
+      [req.query.gameId]: allDataNew,
     };
 
     res.json({
@@ -199,6 +206,19 @@ app.post("/api/upload-excel", upload.single("file"), (req, res) => {
   } catch (error) {
     res.status(500).json({ error: "Failed to process Excel file" });
   }
+});
+
+app.get("/api/qna", (req, res) => {
+  if (!req.query.gameId) {
+    return res.status(400).json({ error: "No gameId uploaded" });
+  }
+  const quiz = quizData[req.query.gameId];
+  if (!quiz) {
+    return res.status(404).json({ error: "Game ID not found" });
+  }
+
+  // Return the quiz data for the specified gameId
+  res.json(quiz);
 });
 
 const PORT = process.env.PORT || 3001;
