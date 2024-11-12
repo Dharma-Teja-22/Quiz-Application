@@ -13,7 +13,7 @@ export default function CreateGame() {
     e.preventDefault();
     
     if (!gameId.trim()) {
-      setError('Please enter a game ID');
+      setError('Please enter a quiz ID');
       return;
     }
 
@@ -37,7 +37,7 @@ export default function CreateGame() {
               value={gameId}
               onChange={(e) => setGameId(e.target.value)}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
-              placeholder="Enter a unique game ID"
+              placeholder="Enter a unique quiz ID"
             />
             <p className="mt-1 text-sm text-miracle-darkGrey">
               This ID will be used by students to join your Quiz

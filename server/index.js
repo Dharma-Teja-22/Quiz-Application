@@ -1,7 +1,7 @@
 import { createServer } from 'http';
 import { Server } from 'socket.io';
 import express from "express"
-import { addQuestion } from './controller/excel.controller.js';
+import { addQuestion, getQuestions } from './controller/excel.controller.js';
 import multer from 'multer'
 
 const app = express()
@@ -17,12 +17,13 @@ const io = new Server(httpServer, {
   }
 });
 
-export const games = new Map();
+export const quizes = new Map();
+export var quizQuestion = [];
 
 io.on('connection', (socket) => {
   console.log('User connected:', socket.id);
-  socket.on('create-game', ({ gameId, questions }) => {
-    games.set(gameId, {
+  socket.on('create-quiz', ({ quizId, questions }) => {
+    quizes.set(String(quizId), {
       host: socket.id,
       players: new Map(),
       questions: questions || [],
@@ -30,25 +31,25 @@ io.on('connection', (socket) => {
       status: 'waiting',
       timer: null
     });
-    socket.join(gameId);
-    console.log(`Game created: ${gameId}`);
+    socket.join(quizId);
+    console.log(`quiz created: ${quizId}`);
   });
 
-  socket.on('join-game', ({ gameId, playerName }, callback) => {
-    const game = games.get(gameId);
+  socket.on('join-quiz', ({ quizId, playerName }, callback) => {
+    const quiz = quizes.get(quizId);
 
-    if (!game) {
-      callback({ success: false, error: 'Game not found' });
+    if (!quiz) {
+      callback({ success: false, error: 'quiz not found' });
       return;
     }
 
-    game.players.set(socket.id, {
+    quiz.players.set(socket.id, {
       name: playerName,
       score: 0
     });
 
-    socket.join(gameId);
-    io.to(game.host).emit('player-joined', {
+    socket.join(quizId);
+    io.to(quiz.host).emit('player-joined', {
       id: socket.id,
       name: playerName,
       score: 0
@@ -57,112 +58,121 @@ io.on('connection', (socket) => {
     callback({ success: true });
   });
 
-  socket.on('game-action', ({ gameId, action }) => {
-    const game = games.get(gameId);
-    if (!game || game.host !== socket.id) return;
+  socket.on('quiz-action', ({ quizId, action }) => {
+    const quiz = quizes.get(quizId);
+    if (!quiz || quiz.host !== socket.id) return;
 
     switch (action) {
       case 'start':
-        game.status = 'playing';
-        io.to(gameId).emit('game-started');
-        startQuestion(gameId);
+        quiz.status = 'playing';
+        io.to(quizId).emit('quiz-started');
+        startQuestion(quizId);
         break;
       case 'pause':
-        game.status = 'paused';
+        quiz.status = 'paused';
         console.log("pause")
-        if (game.timer) clearInterval(game.timer);
-        io.to(gameId).emit('game-paused');
+        if (quiz.timer) clearInterval(quiz.timer);
+        io.to(quizId).emit('quiz-paused');
         break;
       case 'next':
-        game.currentQuestion++;
-        if (game.currentQuestion < game.questions.length) {
-          startQuestion(gameId);
+        quiz.currentQuestion++;
+        if (quiz.currentQuestion < quiz.questions.length) {
+          startQuestion(quizId);
         } else {
-          endGame(gameId);
+          endquiz(quizId);
         }
         break;
     }
   });
 
-  socket.on('submit-answer', ({ gameId, questionId, answer }) => {
-    const game = games.get(gameId);
-    if (!game || game.status !== 'playing') return;
+  socket.on('submit-answer', ({ quizId, questionId, answer }) => {
+    const quiz = quizes.get(quizId);
+    if (!quiz || quiz.status !== 'playing') return;
 
-    const player = game.players.get(socket.id);
+    const player = quiz.players.get(socket.id);
     if (!player) return;
 
-    const question = game.questions[game.currentQuestion];
+    const question = quiz.questions[quiz.currentQuestion];
     if (question.id !== questionId) return;
     console.log(answer, question)
     if (answer === question.correctAnswer) {
       player.score += 100;
-      io.to(game.host).emit('score-update', {
+      io.to(quiz.host).emit('score-update', {
         playerId: socket.id,
         newScore: player.score
       });
     }
   });
 
+  socket.on('get-questions', ({ quizId }) => {
+    const quiz = quizes.get(quizId);
+    if (!quiz) return;
+
+    io.to(quiz.host).emit('questions', quiz.questions);
+  })
+
   socket.on('disconnect', () => {
-    games.forEach((game, gameId) => {
-      if (game.host === socket.id) {
-        games.delete(gameId);
-        io.to(gameId).emit('game-ended');
-      } else if (game.players.has(socket.id)) {
-        game.players.delete(socket.id);
-        io.to(game.host).emit('player-left', socket.id);
+    quizes.forEach((quiz, quizId) => {
+      if (quiz.host === socket.id) {
+        quizes.delete(quizId);
+        io.to(quizId).emit('quiz-ended');
+      } else if (quiz.players.has(socket.id)) {
+        quiz.players.delete(socket.id);
+        io.to(quiz.host).emit('player-left', socket.id);
       }
     });
   });
 });
 
-function startQuestion(gameId) {
-  const game = games.get(gameId);
-  if (!game) return;
+function startQuestion(quizId) {
+  const quiz = quizes.get(quizId);
+  if (!quiz) return;
 
-  const question = game.questions[game.currentQuestion];
-  io.to(gameId).emit('question', question);
+  const question = quiz.questions[quiz.currentQuestion];
+  io.to(quizId).emit('question', question);
 
   let timeLeft = 20;
-  if (game.timer) clearInterval(game.timer);
+  if (quiz.timer) clearInterval(quiz.timer);
 
-  game.timer = setInterval(() => {
+  quiz.timer = setInterval(() => {
     timeLeft--;
-    io.to(gameId).emit('timer', timeLeft);
+    io.to(quizId).emit('timer', timeLeft);
 
     if (timeLeft <= 0) {
-      clearInterval(game.timer);
-      // Move to next question or end game
+      clearInterval(quiz.timer);
+      // Move to next question or end quiz
     }
   }, 1000);
 }
 
-function endGame(gameId) {
-  const game = games.get(gameId);
-  if (!game) return;
+function endquiz(quizId) {
+  const quiz = quizes.get(quizId);
+  if (!quiz) return;
 
-  game.status = 'finished';
-  if (game.timer) clearInterval(game.timer);
+  quiz.status = 'finished';
+  if (quiz.timer) clearInterval(quiz.timer);
 
-  const results = Array.from(game.players.entries()).map(([id, player]) => ({
+  const results = Array.from(quiz.players.entries()).map(([id, player]) => ({
     id,
     name: player.name,
     score: player.score
   })).sort((a, b) => b.score - a.score);
 
-  io.to(gameId).emit('game-ended', { results });
-  games.delete(gameId);
+  io.to(quizId).emit('quiz-ended', { results });
+  quizes.delete(quizId);
 }
 
-app.get('/', (req, res) => {
+app.get('/', (_req, res) => {
   console.log("hitted check");
   res.send("working");
 });
 
-app.post('/add-question', upload.single('file'), (req, res) => {
+app.post('/add-questions', upload.single('file'), (req, res) => {
   addQuestion(req, res);
+  console.log(quizes);
 });
 
+app.get('/get-questions', getQuestions);
 
 const PORT = process.env.PORT || 3001;
 httpServer.listen(PORT, () => {

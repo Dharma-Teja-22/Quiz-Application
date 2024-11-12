@@ -21,12 +21,12 @@ export default function JoinGame() {
       return;
     }
 
-    socket && socket.emit('join-game', { gameId, playerName: name }, (response: { success: boolean, error?: string }) => {
+    socket && socket.emit('join-quiz', { gameId, playerName: name }, (response: { success: boolean, error?: string }) => {
       if (response.success) {
         setPlayerName(name);
         navigate(`/play/${gameId}`);
       } else {
-        setError(response.error || 'Failed to join game');
+        setError(response.error || 'Failed to join quiz');
       }
     });
   };
@@ -34,7 +34,7 @@ export default function JoinGame() {
   return (
     <div className="min-h-full bg-[#EEF7FF] flex items-center justify-center p-4">
       <div className="max-w-md w-full bg-white rounded-lg border border-gray-200 shadow-xl p-8">
-        <h1 className="text-2xl font-bold text-miracle-darkBlue mb-6">Join Game</h1>
+        <h1 className="text-2xl font-bold text-miracle-darkBlue mb-6">Join quiz</h1>
         
         <form onSubmit={handleJoin} className="space-y-6">
           <div>

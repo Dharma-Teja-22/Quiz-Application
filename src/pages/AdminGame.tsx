@@ -28,7 +28,7 @@ export default function AdminGame() {
   useEffect(() => {
     if (!socket) return;
 
-    socket.emit('create-game', { gameId, questions });
+    socket.emit('create-quiz', { gameId, questions });
 
     socket.on('player-joined', (playerData) => {
       setStudents((current) => [...current, playerData]);
@@ -64,19 +64,19 @@ export default function AdminGame() {
 
     switch (action) {
       case 'start':
-        socket.emit('game-action', { gameId, action: 'start' });
+        socket.emit('quiz-action', { gameId, action: 'start' });
         setGameStatus('playing');
         break;
       case 'pause':
-        socket.emit('game-action', { gameId, action: 'pause' });
+        socket.emit('quiz-action', { gameId, action: 'pause' });
         setGameStatus('paused');
         break;
       case 'next':
         countRef.current += 1;
-        socket.emit('game-action', { gameId, action: 'next' });
+        socket.emit('quiz-action', { gameId, action: 'next' });
         break;
       case 'end':
-        socket.emit('game-action', { gameId, action: 'end' });
+        socket.emit('quiz-action', { gameId, action: 'end' });
         navigate('/')
         break;
     }
@@ -90,7 +90,7 @@ export default function AdminGame() {
           <div className=" flex flex-col md:flex-row justify-between items-start sm:items-center gap-4 mb-3 row-span-2">
             <div>
               <h1 className="text-2xl font-bold text-miracle-darkBlue">Quiz Control Panel</h1>
-              <p className="text-miracle-darkGrey">Game ID: {gameId}</p>
+              <p className="text-miracle-darkGrey">quiz ID: {gameId}</p>
             </div>
             <div className="flex items-start h-full gap-2">
               {questions.length > 0 && (

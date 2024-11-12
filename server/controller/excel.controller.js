@@ -2,17 +2,16 @@ import xlsx from 'xlsx';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
-import { games } from '../index.js';
-
+import { quizes, quizQuestion } from '../index.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 export const addQuestion = (req, res) => {
-    try {
+    try {   
         const filePath = req.file.path;
-        const gameId = req.body.gameId;
-        console.log(gameId);
+        const quizId = String(req.body.quizId);
+        console.log(quizId);
 
         const workbook = xlsx.readFile(filePath);
         const sheetName = workbook.SheetNames[0];
@@ -23,14 +22,40 @@ export const addQuestion = (req, res) => {
             options: [row.Option1, row.Option2, row.Option3, row.Option4],
             answer: row.Answer
         }));
-        const jsonPath = __dirname + '/../questions.json';
-        games.set("gameId", gameId);
-        games.set("questions", questions);
-        console.log(games);
-        fs.writeFileSync(jsonPath, JSON.stringify({ gameId: gameId, questions: questions }, null, 2));
-        res.status(200).send({ message: 'File uploaded and data extracted successfully', data: { gameId: games.get("gameId"), questions: games.get("questions") } });
+
+        let existingData = {};
+        try {
+            existingData = JSON.parse(fs.readFileSync(__dirname + '/../questions.json', 'utf8'));
+        } catch (error) {
+            console.log('No existing data found, creating new file.');
+        }
+
+        existingData[quizId] = questions;
+
+        fs.writeFileSync(__dirname + '/../questions.json', JSON.stringify(existingData, null, 2));
+        quizQuestion.push({ [quizId]: questions });
+
+        existingData[quizId] = questions;
+
+        fs.writeFileSync(__dirname + '/../questions.json', JSON.stringify(existingData, null, 2));
+        res.status(200).send({ message: 'File uploaded and data extracted successfully', data: { questions: quizes.get(quizId) } });
     }
     catch (error) {
         res.status(500).send({ message: 'Error processing file', error });
+    }
+};
+
+export const getQuestions = (req, res) => {
+    try {
+        const quizId = String(req.query.quizId);
+        const questionsData = JSON.parse(fs.readFileSync(__dirname + '/../questions.json', 'utf8'));
+
+        if (!questionsData[quizId]) {
+            return res.status(404).send({ message: 'quiz not found' });
+        }
+
+        res.status(200).send({ questions: questionsData[quizId] });
+    } catch (error) {
+        res.status(500).send({ message: 'Error retrieving questions', error });
     }
 };

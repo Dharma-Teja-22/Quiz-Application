@@ -9,7 +9,7 @@ export default function QuestionList({currentQuestionIndex} : {currentQuestionIn
     return (
       <div className="text-center py-8 rounded-xl h-full w-full flex justify-center items-center">
         <div className="text-miracle-darkGrey font-bold sm:text-base">
-          No questions added yet. <br /> Add some questions to start the game!
+          No questions added yet. <br /> Add some questions to start the quiz!
         </div>
       </div>
     );

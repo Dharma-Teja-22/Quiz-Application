@@ -54,22 +54,22 @@ export default function PlayerGame() {
       setTimeLeft(time);
     });
 
-    socket.on('game-paused', () => {
+    socket.on('quiz-paused', () => {
       useGameStore.getState().setGameStatus('paused');
     });
-    socket.on('game-started', () => {
+    socket.on('quiz-started', () => {
       useGameStore.getState().setGameStatus('playing');
     });
 
-    socket.on('game-resumed', () => {
+    socket.on('quiz-resumed', () => {
       useGameStore.getState().setGameStatus('playing');
     });
 
     return () => {
       socket.off('question');
       socket.off('timer');
-      socket.off('game-paused');
-      socket.off('game-resumed');
+      socket.off('quiz-paused');
+      socket.off('quiz-resumed');
     };
   }, [socket]);
 
