@@ -8,7 +8,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 export const addQuestion = (req, res) => {
-    try {   
+    try {
         const filePath = req.file.path;
         const quizId = String(req.body.quizId);
         console.log(quizId);
@@ -38,7 +38,7 @@ export const addQuestion = (req, res) => {
         existingData[quizId] = questions;
 
         fs.writeFileSync(__dirname + '/../questions.json', JSON.stringify(existingData, null, 2));
-        res.status(200).send({ message: 'File uploaded and data extracted successfully', data: { questions: quizes.get(quizId) } });
+        res.status(200).send({ message: 'File uploaded and data extracted successfully', data: { questions: questions } });
     }
     catch (error) {
         res.status(500).send({ message: 'Error processing file', error });
