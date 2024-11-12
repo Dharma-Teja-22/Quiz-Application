@@ -1,9 +1,8 @@
 import { useContext, useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 // import { useSocket } from '../context/SocketContext';
-import { Play, Pause, SkipForward, Users, Timer, Ban } from 'lucide-react';
+import { Play, Pause, SkipForward, Users, Timer, Ban, User } from 'lucide-react';
 import { useGameStore } from '../store/gameStore';
-import QuestionForm from '../components/QuestionForm';
 import QuestionList from '../components/QuestionList';
 import { SocketContext } from '../context/SocketContext';
 import { useNavigate } from 'react-router-dom';
@@ -177,7 +176,7 @@ export default function AdminGame() {
                       >
                         <div className="flex items-start gap-3">
                           <div className="bg-miracle-lightBlue p-2 rounded-full">
-                            <Users className="w-5 h-5 text-miracle-white" />
+                            <User className="w-5 h-5 text-miracle-white" />
                           </div>
                           <div className="flex-1">
                             <h3 className="font-medium text-miracle-black">{player.name.charAt(0).toLocaleUpperCase() + player.name.substring(1)}</h3>
