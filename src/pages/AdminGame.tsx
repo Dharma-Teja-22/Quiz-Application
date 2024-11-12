@@ -6,7 +6,7 @@ import { useGameStore } from '../store/gameStore';
 import QuestionList from '../components/QuestionList';
 import { SocketContext } from '../context/SocketContext';
 import { useNavigate } from 'react-router-dom';
-import API from '../services/API';
+import API from '../servies/API';
 
 
 interface Player {

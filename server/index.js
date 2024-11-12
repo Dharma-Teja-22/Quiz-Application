@@ -41,25 +41,14 @@ io.on('connection', (socket) => {
       return;
     }
 
-    let uniqueName = playerName;
-    if (game.players.has(playerName)) {
-      let counter = 1;
-  
-      while (game.players.has(`${playerName}${counter}`)) {
-        counter++;
-      }
-  
-      uniqueName = `${playerName}${counter}`;
-    }
-
-    game.players.set(uniqueName, {
-      name: uniqueName,
+    game.players.set(socket.id, {
+      name: playerName,
       score: 0
     });
 
     socket.join(gameId);
     io.to(game.host).emit('player-joined', {
-      id: uniqueName,
+      id: socket.id,
       name: playerName,
       score: 0
     });

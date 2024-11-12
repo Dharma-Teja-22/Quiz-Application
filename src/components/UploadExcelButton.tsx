@@ -1,7 +1,7 @@
 import { Loader2, Upload } from 'lucide-react';
 import React, { useState } from 'react';
 import { useGameStore } from '../store/gameStore';
-import API from '../services/API';
+import API from '../servies/API';
 
 const CustomUploadButton: React.FC = () => {
   const [isUploading, setIsUploading] = useState<boolean>(false);
