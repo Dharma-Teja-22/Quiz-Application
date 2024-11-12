@@ -3,9 +3,12 @@ import { Server } from 'socket.io';
 import express from "express"
 import { addQuestion, getQuestions } from './controller/excel.controller.js';
 import multer from 'multer'
+import cors from 'cors'
+
 
 const app = express()
 app.use(express.json())
+app.use(cors())
 const upload = multer({ dest: 'uploads/' });
 
 
