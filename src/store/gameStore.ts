@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-interface Question {
+export interface Question {
   id: number;
   question: string;
   options: string[];
@@ -47,5 +47,5 @@ export const useGameStore = create<GameState>((set) => ({
     questions: state.questions.filter(q => q.id !== id)
   })),
   setQuestions: (questions) => set({ questions }),
-  
+
 }));

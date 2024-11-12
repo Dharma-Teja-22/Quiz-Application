@@ -1,5 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { Gamepad2, Users } from 'lucide-react';
+import dsLogo from '../assets/Digital_Summit_24_Logo_Dark.svg'
+
 
 export default function Home() {
   const navigate = useNavigate();
@@ -8,6 +10,9 @@ export default function Home() {
     <div className="min-h-full bg-[#EEF7FF] flex items-center justify-center p-4">
       <div className="max-w-md bg-white w-full space-y-8 shadow-xl border border-gray-200 p-8 rounded-lg">
         <div className="text-center">
+          <div className='flex justify-center'>
+          <img src={dsLogo} width={100} alt="" />
+          </div>
           <h1 className="text-4xl font-bold text-miracle-darkBlue mb-2">QuizMaster</h1>
           <p className="text-miracle-darkBlue/80">Create or join interactive quizzes in real-time!</p>
         </div>

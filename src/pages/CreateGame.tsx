@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useGameStore } from '../store/gameStore';
 import { ArrowRight } from 'lucide-react';
+import dsLogo from '../assets/Digital_Summit_24_Logo_Dark.svg'
 
 export default function CreateGame() {
   const navigate = useNavigate();
@@ -24,11 +25,14 @@ export default function CreateGame() {
   return (
     <div className="min-h-full bg-[#EEF7FF] flex items-center justify-center p-4">
       <div className="max-w-md w-full bg-white rounded-lg p-8 shadow-xl border border-gray-200">
-        <h1 className="text-2xl font-bold text-miracle-darkBlue mb-6">Create New Quiz</h1>
+          <div className='flex justify-center'>
+          <img src={dsLogo} width={100} alt="" />
+          </div>
+        <h1 className="text-2xl font-bold text-miracle-darkBlue mb-6 text-center">Create New Quiz</h1>
         
         <form onSubmit={handleCreate} className="space-y-6">
           <div>
-            <label htmlFor="gameId" className="block text-sm font-medium text-miracle-darkGrey mb-1">
+            <label htmlFor="gameId" className="block font-medium text-miracle-black mb-1">
               Quiz ID
             </label>
             <input

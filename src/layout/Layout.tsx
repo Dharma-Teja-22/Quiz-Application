@@ -9,9 +9,9 @@ import JoinGame from "../pages/JoinGame";
 
 export default function Layout() {
   return (
-    <div className="h-screen flex flex-col">
+    <div className="h-screen grid grid-rows-12">
         <Header />
-        <div className="flex-grow">
+        <div className="row-span-11">
             <Routes>
                 <Route path="/" element={<Home />} />
                 <Route path="/create" element={<CreateGame />} />

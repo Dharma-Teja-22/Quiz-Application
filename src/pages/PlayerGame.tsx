@@ -4,6 +4,7 @@ import { useParams } from 'react-router-dom';
 // import { useSocket } from '../context/SocketContext';
 import { useGameStore } from '../store/gameStore';
 import { SocketContext } from '../context/SocketContext';
+import dsLogo from '../assets/Digital_Summit_24_Logo_Dark.svg'
 
 interface Question {
   id: number;
@@ -88,13 +89,16 @@ export default function PlayerGame() {
   };
 
   return (
-    <div className="min-h-full bg-[#EEF7FF] flex items-center justify-center  ">
-      <div className="max-w-2xl w-[90%]">
+    <div className="min-h-full bg-[#EEF7FF] flex items-center justify-center relative">
+      <div className="max-w-2xl w-[90%] z-10 ">
         <div className="bg-miracle-white rounded-lg border border-gray-200 shadow-xl p-6 mb-4">
           <div className="flex justify-between items-center mb-6">
-            <div>
-              <h2 className="text-xl font-semibold text-miracle-darkBlue">{playerName.charAt(0).toLocaleUpperCase() + playerName.substring(1)}</h2>
-            
+            <div className='w-full'>
+            <div className='flex justify-center'>
+              <img src={dsLogo} width={100} alt="" />
+            </div>
+              <h2 className="text-xl font-semibold text-miracle-darkBlue text-center">{playerName.charAt(0).toLocaleUpperCase() + playerName.substring(1)}</h2>
+              <h5 className='text-center text-miracle-darkGrey'>Quiz Id : {gameId}</h5>
             </div>
             {gameStatus === 'playing' && (
               <div className="flex items-center gap-2 bg-miracle-lightBlue px-4 py-2 rounded-full">

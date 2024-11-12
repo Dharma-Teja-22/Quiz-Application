@@ -1,5 +1,6 @@
 import { Trash2 } from 'lucide-react';
 import { useGameStore } from '../store/gameStore';
+import UploadExcelButton from './UploadExcelButton';
 
 export default function QuestionList({currentQuestionIndex} : {currentQuestionIndex : number}) {
   const questions = useGameStore((state) => state.questions);
@@ -7,9 +8,12 @@ export default function QuestionList({currentQuestionIndex} : {currentQuestionIn
 
   if (questions.length === 0) {
     return (
-      <div className="text-center py-8 rounded-xl h-full w-full flex justify-center items-center">
+      <div className="text-center py-8 rounded-xl h-full w-full flex flex-col justify-center items-center">
         <div className="text-miracle-darkGrey font-bold sm:text-base">
           No questions added yet. <br /> Add some questions to start the game!
+        </div>
+        <div className='mt-3'>
+          <UploadExcelButton />
         </div>
       </div>
     );

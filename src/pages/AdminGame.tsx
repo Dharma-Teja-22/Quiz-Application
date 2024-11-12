@@ -7,6 +7,7 @@ import QuestionForm from '../components/QuestionForm';
 import QuestionList from '../components/QuestionList';
 import { SocketContext } from '../context/SocketContext';
 import { useNavigate } from 'react-router-dom';
+import API from '../services/API';
 
 
 interface Player {
@@ -59,6 +60,25 @@ export default function AdminGame() {
     };
   }, [socket, gameId, questions]);
 
+  const fetchQuestions = async () => {
+    try{
+      if(gameId){
+        const response = await API.get.getQuestions(gameId);
+        if(response){
+          // console.log(response)
+          useGameStore.getState().setQuestions(response.questions);
+        }
+      }
+    }
+    catch(err){
+      console.log(err);
+    }
+  }
+
+  useEffect(() => {
+    fetchQuestions();
+  },[])
+
   const handleGameControl = (action: 'start' | 'pause' | 'next' | 'end') => {
     console.log(questions.length,socket)
     if (!socket || questions.length === 0) return;
@@ -84,14 +104,14 @@ export default function AdminGame() {
   };
 
   return (
-    <div className='min-h-full bg-[#EEF7FF]'>
-          <div className="overflow-auto w-full h-full lg:grid mx-auto lg:grid-rows-12 lg:grid-cols-12 gap-3 p-2">
+    <div className='h-full bg-[#EEF7FF]'>
+          <div className="overflow-auto w-full h-full lg:grid mx-auto lg:grid-cols-2 lg:grid-rows-1 gap-3 p-2">
 
-            <div className="h-fit bg-white max-h-[500px] md:max-h-full mb-3 md:row-start-1 md:row-end-7 md:col-start-1 md:col-end-7 md:grid md:grid-rows-10 p-2 xl:p-5 rounded-lg border border-gray-200 shadow-lg">
+            <div className="h-fit md:h-full bg-white mb-3 p-2 xl:p-5 col-span-1 rounded-lg border border-gray-200 shadow-lg md:mb-0">
               <div className="flex flex-col md:flex-row justify-between items-start sm:items-center gap-4 mb-3 row-span-2">
                 <div>
                   <h1 className="text-2xl font-bold text-miracle-darkBlue">Quiz Control Panel</h1>
-                  <p className="text-miracle-darkGrey">Game ID: {gameId}</p>
+                  <p className="text-miracle-darkGrey">Quiz ID: {gameId}</p>
                 </div>
                 <div className="flex items-start h-full gap-2">
                   {questions.length > 0 &&  (
@@ -172,14 +192,11 @@ export default function AdminGame() {
                       </div>
                     ))}
                   </div>
-                ) : <div className='flex justify-center h-[90%] text-miracle-darkGrey font-bold items-center'>Waiting for Students to join...</div> }
+                ) : <div className='flex justify-center md:h-[350px] text-miracle-darkGrey font-bold items-center'>Waiting for Students to join...</div> }
               </div>
             </div>
 
-            <div className="h-fit md:h-full mb-3 md:row-start-7 md:row-end-13 md:col-start-1 md:col-end-7 overflow-auto p-2 xl:p-5 rounded-lg border border-gray-200 bg-white shadow-lg">
-              <QuestionForm />
-            </div>
-            <div className='h-full max-h-[500px] md:max-h-full md:row-span-full md:col-start-7 md:col-end-13 overflow-scroll no-scrollbar pb-2 border rounded-lg border-gray-200 bg-white shadow-lg'>
+            <div className='h-full max-h-[500px] md:max-h-full overflow-scroll no-scrollbar pb-2 border rounded-lg border-gray-200 bg-white shadow-lg'>
               <QuestionList currentQuestionIndex={countRef.current} />
             </div>
           </div>
