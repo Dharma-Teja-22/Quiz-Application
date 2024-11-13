@@ -1,40 +1,43 @@
-import { Loader2, Upload } from 'lucide-react';
-import React, { useState } from 'react';
-import { useGameStore } from '../store/gameStore';
-import API from '../servies/API';
+import { Loader2, Upload } from "lucide-react";
+import React, { useContext, useState } from "react";
+import { useGameStore } from "../store/gameStore";
+import API from "../servies/API";
+import { useParams } from "react-router-dom";
+import { SocketContext } from "../context/SocketContext";
 
 const CustomUploadButton: React.FC = () => {
   const [isUploading, setIsUploading] = useState<boolean>(false);
-  const gameId = useGameStore((state) => state.gameId);
-
+  const { gameId } = useParams();
+  const socket = useContext(SocketContext);
 
   // Function to handle file selection
-  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const file = event.target.files?.[0];
     if (file) {
-            setIsUploading(true);
-            const formData = new FormData();
-            formData.append('quizId',gameId as string);
-            formData.append('file', file); 
-            try {
-                const response = await API.post.uploadExcel(formData);
-                // console.log(response.data.questions)
-            if (response) {
-                useGameStore.getState().setQuestions(response.data.questions);
-            }
-            } catch (error) {
-            console.error('Error uploading file:', error);
-            }
-            finally{
-                setIsUploading(false);
-            }
+      setIsUploading(true);
+      const formData = new FormData();
+      formData.append("file", file);
+      try {
+        const result = await API.post.uploadExcel(formData, gameId);
+        // console.log(response.data.questions)
+        if (result) {
+          useGameStore.getState().setQuestions(result.questions);
+          socket?.emit("create-game", { gameId, questions: result.questions });
         }
+      } catch (error) {
+        console.error("Error uploading file:", error);
+      } finally {
+        setIsUploading(false);
+      }
+    }
   };
 
   // Trigger file input click when button is clicked
   const handleButtonClick = (): void => {
-    const fileInput = document.getElementById('fileInput') as HTMLInputElement;
-    fileInput?.click(); 
+    const fileInput = document.getElementById("fileInput") as HTMLInputElement;
+    fileInput?.click();
   };
 
   return (
@@ -43,25 +46,23 @@ const CustomUploadButton: React.FC = () => {
       <input
         id="fileInput"
         type="file"
-        style={{ display: 'none' }}
+        style={{ display: "none" }}
         onChange={handleFileChange}
       />
 
       {/* Custom button to trigger file input */}
-      {
-        isUploading ? <button
-        className='bg-miracle-mediumBlue/70 p-2 rounded-lg text-white'
-      >
-        <Loader2 className='inline h-5 w-5 animate-spin' /> Uploading...
-      </button> : 
+      {isUploading ? (
+        <button className="bg-miracle-mediumBlue/70 p-2 rounded-lg text-white">
+          <Loader2 className="inline h-5 w-5 animate-spin" /> Uploading...
+        </button>
+      ) : (
         <button
-        onClick={handleButtonClick}
-        className='bg-miracle-mediumBlue p-2 rounded-lg text-white'
-      >
-        <Upload className='inline h-5 w-5' /> Upload File
-      </button>
-    }
-
+          onClick={handleButtonClick}
+          className="bg-miracle-mediumBlue p-2 rounded-lg text-white"
+        >
+          <Upload className="inline h-5 w-5" /> Upload File
+        </button>
+      )}
     </div>
   );
 };

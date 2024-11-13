@@ -23,7 +23,7 @@ export default function PlayerGame() {
   const [isAnswerLocked, setIsAnswerLocked] = useState(false);
   const gameStatus = useGameStore((state) => state.gameStatus);
   const playerName = useGameStore((state) => state.playerName);
-
+  const [isLastQuestion,setIsLastQuestion] = useState(false);
   const selectedAnswerRef = useRef(selectedAnswer);
 
   useEffect(() => {
@@ -33,10 +33,11 @@ export default function PlayerGame() {
   useEffect(() => {
     if (!socket) return;
 
-    socket.on('question', (question,timeLeft,type) => {
+    socket.on('question', (question,timeLeft,type,isFinalQuestion) => {
       if(type === "next"){
         setSelectedAnswer(null);
         setIsAnswerLocked(false);
+        setIsLastQuestion(isFinalQuestion);
       }
       else if(selectedAnswerRef.current === null){
         setSelectedAnswer(null);
@@ -85,6 +86,7 @@ export default function PlayerGame() {
       gameId,
       questionId: currentQuestion?.id,
       answer: answerIndex,
+      playerName : playerName
     });
   };
 
@@ -92,20 +94,26 @@ export default function PlayerGame() {
     <div className="min-h-full bg-[#EEF7FF] flex items-center justify-center relative">
       <div className="max-w-2xl w-[90%] z-10 ">
         <div className="bg-miracle-white rounded-lg border border-gray-200 shadow-xl p-6 mb-4">
-          <div className="flex justify-between items-center mb-6">
-            <div className='w-full'>
+          <div className=" mb-6">
             <div className='flex justify-center'>
               <img src={dsLogo} width={100} alt="" />
             </div>
-              <h2 className="text-xl font-semibold text-miracle-darkBlue text-center">{playerName.charAt(0).toLocaleUpperCase() + playerName.substring(1)}</h2>
-              <h5 className='text-center text-miracle-darkGrey'>Quiz Id : {gameId}</h5>
-            </div>
-            {gameStatus === 'playing' && (
-              <div className="flex items-center gap-2 bg-miracle-lightBlue px-4 py-2 rounded-full">
+            <div className='w-full flex justify-between'>
+              <div>
+              <h2 className="text-xl font-semibold text-miracle-darkBlue">{playerName.charAt(0).toLocaleUpperCase() + playerName.substring(1)}</h2>
+              <h5 className=' text-miracle-darkGrey'>Quiz Id : {gameId}</h5>
+              </div>
+              {gameStatus === 'playing' && (
+                <div className='flex items-center'>
+                <div className="flex items-center gap-2 bg-miracle-lightBlue px-4 py-2 h-10 rounded-full">
                 <Timer className="w-4 h-4 text-miracle-white" />
                 <span className="text-miracle-white font-medium">{timeLeft}s</span>
               </div>
+                </div>
+
             )}
+            </div>
+            
           </div>
 
           {gameStatus === 'paused' ? (
@@ -139,7 +147,7 @@ export default function PlayerGame() {
             <div className="text-center py-8">
               <h3 className="text-xl font-semibold text-miracle-lightGrey">
                 {
-                  gameStatus === 'finished' ? <h2>Quiz completed <br/>  Thanks for participating</h2> : "Waiting for the next question..."
+                  gameStatus === 'finished' || isLastQuestion ? <h2>Quiz completed <br/>  Thanks for participating</h2> : "Waiting for the next question..."
                 }
               </h3>
             </div>

@@ -10,7 +10,6 @@ import API from '../servies/API';
 
 
 interface Player {
-  id: string;
   name: string;
   score: number;
 }
@@ -29,20 +28,18 @@ export default function AdminGame() {
   useEffect(() => {
     if (!socket) return;
 
-    socket.emit('create-game', { gameId, questions });
-
     socket.on('player-joined', (playerData) => {
       setStudents((current) => [...current, playerData]);
     });
 
     socket.on('player-left', (playerId) => {
-      setStudents((current) => current.filter(p => p.id !== playerId));
+      setStudents((current) => current.filter(p => p.name !== playerId));
     });
 
-    socket.on('score-update', ({ playerId, newScore }) => {
+    socket.on('score-update', ({ playerName, newScore }) => {
       console.log("updated score")
       setStudents((current) =>
-        current.map(p => p.id === playerId ? { ...p, score: newScore } : p)
+        current.map(p => p.name === playerName ? { ...p, score: newScore } : p)
         .sort((a, b) => b.score - a.score)
       );
     });
@@ -62,10 +59,10 @@ export default function AdminGame() {
   const fetchQuestions = async () => {
     try{
       if(gameId){
-        const response = await API.get.getQuestions(gameId);
-        if(response){
+        const result = await API.get.getQuestions(gameId);
+        if(result){
           // console.log(response)
-          useGameStore.getState().setQuestions(response.questions);
+          useGameStore.getState().setQuestions(result);
         }
       }
     }
@@ -93,7 +90,8 @@ export default function AdminGame() {
         break;
       case 'next':
         countRef.current+=1;
-        socket.emit('game-action', { gameId, action: 'next' });
+        setGameStatus('playing')
+        socket.emit('game-action', { gameId, action: 'next',isLastQuestion : countRef.current === questions.length-1 });
         break;
       case 'end':
         socket.emit('game-action', { gameId, action: 'end' });
@@ -171,7 +169,7 @@ export default function AdminGame() {
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-2 h-[300px] md:h-full overflow-scroll no-scrollbar pb-5 md:pb-12">
                     {students.map((player) => (
                       <div
-                        key={player.id}
+                        key={player.name}
                         className="bg-white rounded-lg py-2 px-1 transition-all duration-200 border border-gray-200 shadow-lg max-h-[70px]"
                       >
                         <div className="flex items-start gap-3">
