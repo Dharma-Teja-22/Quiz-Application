@@ -13,7 +13,8 @@ export default function Home() {
           <div className='flex justify-center'>
           <img src={dsLogo} width={100} alt="" />
           </div>
-          <h1 className="text-4xl font-bold text-miracle-darkBlue mb-2">QuizMaster</h1>
+          <h1 className="text-4xl font-bold text-miracle-darkBlue mb-2">DS'24 Quiz Master
+          </h1>
           <p className="text-miracle-darkBlue/80">Create or join interactive quizzes in real-time!</p>
         </div>
         

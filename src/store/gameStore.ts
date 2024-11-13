@@ -5,10 +5,12 @@ export interface Question {
   question: string;
   options: string[];
   correctAnswer: number;
+  showAnswer : boolean
 }
 
 interface GameState {
   gameId: string | null;
+  isAuthenticated : boolean;
   playerName: string;
   isAdmin: boolean;
   currentQuestion: number;
@@ -16,6 +18,7 @@ interface GameState {
   gameStatus: 'waiting' | 'playing' | 'paused' | 'finished';
   questions: Question[];
   setGameId: (id: string) => void;
+  setIsAuthenticated : (value : boolean) => void;
   setPlayerName: (name: string) => void;
   setIsAdmin: (isAdmin: boolean) => void;
   setCurrentQuestion: (questionNum: number) => void;
@@ -28,6 +31,7 @@ interface GameState {
 
 export const useGameStore = create<GameState>((set) => ({
   gameId: null,
+  isAuthenticated : false,
   playerName: '',
   isAdmin: false,
   currentQuestion: 0,
@@ -35,6 +39,7 @@ export const useGameStore = create<GameState>((set) => ({
   gameStatus: 'waiting',
   questions: [],
   setGameId: (id) => set({ gameId: id }),
+  setIsAuthenticated : (value) => set({isAuthenticated : value}),
   setPlayerName: (name) => set({ playerName: name }),
   setIsAdmin: (isAdmin) => set({ isAdmin }),
   setCurrentQuestion: (questionNum) => set({ currentQuestion: questionNum }),

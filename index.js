@@ -23,35 +23,45 @@ const io = new Server(httpServer, {
   },
 });
 
-app.use(cors({ origin: ["http://localhost:5173"] }));
+app.use(cors({ origin: ["http://172.17.10.127:5173"] }));
 
 const upload = multer({ dest: "uploads/" }); // Configure multer for file uploads
 
-const games = new Map();
+const quizzes = new Map();
 
 io.on("connection", (socket) => {
   console.log("User connected:", socket.id);
 
   socket.on("create-game", ({ gameId, questions }) => {
-    games.set(gameId, {
+    quizzes.set(gameId, {
       host: socket.id,
       players: new Map(),
       questions: questions || [],
       currentQuestion: 0,
       status: "waiting",
       timer: null,
-      timerVal: 20,
+      timerVal: 10,
     });
     socket.join(gameId);
     console.log(`Game created: ${gameId}`);
-    // console.log(games);
+    // console.log(quizzes);
   });
 
+  socket.on("create", ({gameId}, callback) => {
+    console.log(quizzes,gameId)
+    if(quizzes.has(gameId)){
+      callback({ success: false, error: "Quiz Id already exists" });
+      return;
+    }
+
+    callback({ success: true })
+  })
+
   socket.on("join-game", ({ gameId, playerName }, callback) => {
-    const game = games.get(gameId);
+    const game = quizzes.get(gameId);
 
     if (!game) {
-      callback({ success: false, error: "Game not found" });
+      callback({ success: false, error: "Quiz not found" });
       return;
     }
 
@@ -76,7 +86,7 @@ io.on("connection", (socket) => {
   });
 
   socket.on("game-action", ({ gameId, action }) => {
-    const game = games.get(gameId);
+    const game = quizzes.get(gameId);
     if (!game || game.host !== socket.id) return;
     switch (action) {
       case "start":
@@ -93,7 +103,8 @@ io.on("connection", (socket) => {
       case "next":
         game.currentQuestion++;
         if (game.currentQuestion < game.questions.length) {
-          game.timerVal = 20;
+          io.to(gameId).emit("game-started");
+          game.timerVal = 10;
           startQuestion(gameId, "next");
         } else {
           endGame(gameId);
@@ -101,18 +112,18 @@ io.on("connection", (socket) => {
         break;
       case "end":
         io.to(gameId).emit("end");
-        games.forEach((game, gameId) => {
+        quizzes.forEach((game, gameId) => {
           if (game.host === socket.id) {
-            games.delete(gameId);
+            quizzes.delete(gameId);
             io.to(gameId).emit("game-ended");
           }})
         break;
     }
   });
 
-  socket.on("submit-answer", ({ gameId, questionId, answer,playerName }) => {
+  socket.on("submit-answer", ({ gameId, questionId, answer,playerName,timeLeft }) => {
     console.log("answer recieved");
-    const game = games.get(gameId);
+    const game = quizzes.get(gameId);
     if (!game || game.status !== "playing") return;
 
     const player = game.players.get(playerName);
@@ -123,7 +134,7 @@ io.on("connection", (socket) => {
     if (question.id !== questionId) return;
     console.log(answer, question);
     if (answer === question.correctAnswer) {
-      player.score += 100;
+      player.score += (timeLeft * 10);
       io.to(game.host).emit("score-update", {
         playerName: playerName,
         newScore: player.score,
@@ -132,7 +143,7 @@ io.on("connection", (socket) => {
   });
 
   // socket.on("disconnect", () => {
-  //   games.forEach((game, gameId) => {
+  //   quizzes.forEach((game, gameId) => {
   //     if (game.players.has(socket.id)) {
   //       game.players.delete(socket.id);
   //       io.to(game.host).emit("player-left", socket.id);
@@ -142,7 +153,7 @@ io.on("connection", (socket) => {
 });
 
 function startQuestion(gameId, type) {
-  const game = games.get(gameId);
+  const game = quizzes.get(gameId);
   if (!game) return;
 
   const question = game.questions[game.currentQuestion];
@@ -164,7 +175,7 @@ function startQuestion(gameId, type) {
 }
 
 function endGame(gameId) {
-  const game = games.get(gameId);
+  const game = quizzes.get(gameId);
   if (!game) return;
 
   game.status = "finished";
@@ -179,7 +190,7 @@ function endGame(gameId) {
     .sort((a, b) => b.score - a.score);
 
   io.to(gameId).emit("game-ended", { results });
-  games.delete(gameId);
+  quizzes.delete(gameId);
 }
 
 // New API endpoint to upload and convert Excel to JSON
@@ -225,8 +236,8 @@ app.get("/api/qna", (req, res) => {
     return res.status(400).json({ error: "No gameId uploaded" });
   }
   // const quiz = quizData[req.query.gameId];
-  console.log(games)
-  const quiz = games.get(req.query.quizId)
+  console.log(quizzes)
+  const quiz = quizzes.get(req.query.quizId)
   if(quiz){
     console.log(quiz)
     res.json(quiz.questions);

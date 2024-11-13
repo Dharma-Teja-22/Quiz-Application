@@ -1,14 +1,18 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useGameStore } from '../store/gameStore';
 import { ArrowRight } from 'lucide-react';
 import dsLogo from '../assets/Digital_Summit_24_Logo_Dark.svg'
+import { SocketContext } from '../context/SocketContext';
+
 
 export default function CreateGame() {
   const navigate = useNavigate();
   const [gameId, setGameId] = useState('');
   const [error, setError] = useState('');
   const setIsAdmin = useGameStore((state) => state.setIsAdmin);
+  const socket = useContext(SocketContext);
+
 
   const handleCreate = (e: React.FormEvent) => {
     e.preventDefault();
@@ -18,8 +22,15 @@ export default function CreateGame() {
       return;
     }
 
-    setIsAdmin(true);
-    navigate(`/admin/${gameId}`);
+    socket && socket.emit('create', { gameId }, (response: { success: boolean, error?: string }) => {
+      if (response.success) {
+        setIsAdmin(true);
+        navigate(`/admin/${gameId}`);
+      } else {
+        setError(response.error || 'Failed to join game');
+      }
+    });
+
   };
 
   return (
@@ -28,7 +39,7 @@ export default function CreateGame() {
           <div className='flex justify-center'>
           <img src={dsLogo} width={100} alt="" />
           </div>
-        <h1 className="text-2xl font-bold text-miracle-darkBlue mb-6 text-center">Create New Quiz</h1>
+        <h1 className="text-4xl font-bold text-miracle-darkBlue mb-5 text-center">Create New Quiz</h1>
         
         <form onSubmit={handleCreate} className="space-y-6">
           <div>
@@ -41,10 +52,10 @@ export default function CreateGame() {
               value={gameId}
               onChange={(e) => setGameId(e.target.value)}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
-              placeholder="Enter a unique game ID"
+              placeholder="Enter a unique Quiz ID"
             />
             <p className="mt-1 text-sm text-miracle-darkGrey">
-              This ID will be used by students to join your Quiz
+              This ID will be used by students to join Quiz
             </p>
           </div>
 

@@ -1,93 +1,103 @@
-import { Timer } from 'lucide-react';
-import { useContext, useEffect, useRef, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { Timer } from "lucide-react";
+import { useContext, useEffect, useRef, useState } from "react";
+import { useParams } from "react-router-dom";
 // import { useSocket } from '../context/SocketContext';
-import { useGameStore } from '../store/gameStore';
-import { SocketContext } from '../context/SocketContext';
-import dsLogo from '../assets/Digital_Summit_24_Logo_Dark.svg'
+import { useGameStore } from "../store/gameStore";
+import { SocketContext } from "../context/SocketContext";
+import dsLogo from "../assets/Digital_Summit_24_Logo_Dark.svg";
 
 interface Question {
   id: number;
   question: string;
   options: string[];
   correctAnswer: number;
-
 }
 
 export default function PlayerGame() {
   const { gameId } = useParams();
   const socket = useContext(SocketContext);
   const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null);
-  const [timeLeft, setTimeLeft] = useState<number>(20);
+  const [timeLeft, setTimeLeft] = useState<number>(0);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [isAnswerLocked, setIsAnswerLocked] = useState(false);
   const gameStatus = useGameStore((state) => state.gameStatus);
   const playerName = useGameStore((state) => state.playerName);
-  const [isLastQuestion,setIsLastQuestion] = useState(false);
+  const [isLastQuestion, setIsLastQuestion] = useState(false);
   const selectedAnswerRef = useRef(selectedAnswer);
+  const [gameStarted,setGameStarted] = useState<boolean>(false);
 
   useEffect(() => {
     selectedAnswerRef.current = selectedAnswer;
-  },[selectedAnswer])
+  }, [selectedAnswer]);
+
+  // useEffect(() => {
+  //   const currentLocalQuestion = localStorage.getItem("currentLocalQuestion");
+  //   if (currentLocalQuestion) {
+  //     console.log(Object.keys(currentLocalQuestion));
+  //     setCurrentQuestion(JSON.parse(currentLocalQuestion));
+  //   }
+  // }, []);
 
   useEffect(() => {
     if (!socket) return;
 
-    socket.on('question', (question,timeLeft,type,isFinalQuestion) => {
-      if(type === "next"){
+    socket.on("question", (question, timeLeft, type, isFinalQuestion) => {
+      if (type === "next") {
         setSelectedAnswer(null);
         setIsAnswerLocked(false);
         setIsLastQuestion(isFinalQuestion);
-      }
-      else if(selectedAnswerRef.current === null){
+      } else if (selectedAnswerRef.current === null) {
         setSelectedAnswer(null);
         setIsAnswerLocked(false);
       }
-      console.log("selectedAnswer : "+selectedAnswerRef.current)
+      console.log("selectedAnswer : " + selectedAnswerRef.current);
+      localStorage.setItem("currentLocalQuestion", JSON.stringify(question));
       setCurrentQuestion(question);
       setTimeLeft(timeLeft);
+      setGameStarted(true)
     });
 
-    socket.on('end',() => {
-      useGameStore.getState().setGameStatus('finished');
-    })
+    socket.on("end", () => {
+      useGameStore.getState().setGameStatus("finished");
+    });
 
-    socket.on('timer', (time) => {
+    socket.on("timer", (time) => {
       setTimeLeft(time);
     });
 
-    socket.on('game-paused', () => {
-      useGameStore.getState().setGameStatus('paused');
+    socket.on("game-paused", () => {
+      useGameStore.getState().setGameStatus("paused");
     });
-    socket.on('game-started', () => {
-      useGameStore.getState().setGameStatus('playing');
+    socket.on("game-started", () => {
+      useGameStore.getState().setGameStatus("playing");
     });
 
-    socket.on('game-resumed', () => {
-      useGameStore.getState().setGameStatus('playing');
+    socket.on("game-resumed", () => {
+      useGameStore.getState().setGameStatus("playing");
     });
 
     return () => {
-      socket.off('question');
-      socket.off('timer');
-      socket.off('game-paused');
-      socket.off('game-resumed');
+      socket.off("question");
+      socket.off("timer");
+      socket.off("game-paused");
+      socket.off("game-resumed");
     };
   }, [socket]);
 
-
   const handleAnswerSelect = (answerIndex: number) => {
-    console.log(answerIndex,isAnswerLocked ,gameStatus)
-    if (isAnswerLocked || gameStatus !== 'playing') return;
+    console.log(answerIndex, isAnswerLocked, gameStatus);
+    if (isAnswerLocked || gameStatus !== "playing") return;
 
     setSelectedAnswer(answerIndex);
     setIsAnswerLocked(true);
-    socket && socket.emit('submit-answer', {
-      gameId,
-      questionId: currentQuestion?.id,
-      answer: answerIndex,
-      playerName : playerName
-    });
+    socket &&
+      socket.emit("submit-answer", {
+        gameId,
+        questionId: currentQuestion?.id,
+        answer: answerIndex,
+        playerName: playerName,
+        timeLeft: timeLeft,
+      });
   };
 
   return (
@@ -95,31 +105,45 @@ export default function PlayerGame() {
       <div className="max-w-2xl w-[90%] z-10 ">
         <div className="bg-miracle-white rounded-lg border border-gray-200 shadow-xl p-6 mb-4">
           <div className=" mb-6">
-            <div className='flex justify-center'>
+            <div className="flex justify-between">
+              <div className="flex flex-col justify-center">
+                <h2 className="text-xl font-semibold text-miracle-darkBlue">
+                  {playerName.charAt(0).toLocaleUpperCase() +
+                    playerName.substring(1)}
+                </h2>
+                <h5 className=" text-miracle-darkGrey">Quiz Id: {gameId}</h5>
+              </div>
               <img src={dsLogo} width={100} alt="" />
             </div>
-            <div className='w-full flex justify-between'>
-              <div>
-              <h2 className="text-xl font-semibold text-miracle-darkBlue">{playerName.charAt(0).toLocaleUpperCase() + playerName.substring(1)}</h2>
-              <h5 className=' text-miracle-darkGrey'>Quiz Id : {gameId}</h5>
-              </div>
-              {gameStatus === 'playing' && (
-                <div className='flex items-center'>
-                <div className="flex items-center gap-2 bg-miracle-lightBlue px-4 py-2 h-10 rounded-full">
-                <Timer className="w-4 h-4 text-miracle-white" />
-                <span className="text-miracle-white font-medium">{timeLeft}s</span>
-              </div>
+            <hr></hr>
+            {
+              timeLeft > 0 && <div className="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
+                      <div className={`bg-miracle-lightBlue h-2.5 rounded-full`} style={{width:(timeLeft * 10)+"%"}} ></div>
+                    </div>
+            }
+          
+            {/* <div className="w-full flex justify-between">
+              {gameStatus === "playing" && (
+                <div className="flex items-center">
+                  <div className="flex items-center gap-2 bg-miracle-lightBlue px-4 py-2 h-10 rounded-full">
+                    <Timer className="w-4 h-4 text-miracle-white" />
+                    <span className="text-miracle-white font-medium">
+                      {timeLeft}s
+                    </span>
+                  </div>
                 </div>
-
-            )}
-            </div>
-            
+              )}
+            </div> */}
           </div>
 
-          {gameStatus === 'paused' ? (
+          {gameStarted ? gameStatus === "paused" ? (
             <div className="text-center py-8">
-              <h3 className="text-xl font-semibold text-miracle-darkGrey">Quiz Paused</h3>
-              <p className="text-miracle-darkGrey">Waiting for the host to resume...</p>
+              <h3 className="text-xl font-semibold text-miracle-darkGrey">
+                Quiz Paused
+              </h3>
+              <p className="text-miracle-darkGrey">
+                Waiting for the host to resume...
+              </p>
             </div>
           ) : currentQuestion && timeLeft !== 0 ? (
             <>
@@ -133,9 +157,13 @@ export default function PlayerGame() {
                     onClick={() => handleAnswerSelect(index)}
                     className={`p-4 text-left transition-all rounded-lg ${
                       selectedAnswerRef.current === index
-                        ? 'bg-miracle-lightBlue text-white'
-                        : 'ring-2 ring-[#00aae7]/50 text-black bg-[#00aae7]/5'
-                    } ${(isAnswerLocked || timeLeft === 0) ? 'cursor-not-allowed' : 'cursor-pointer'}`}
+                        ? "bg-miracle-lightBlue text-white"
+                        : "ring-2 ring-[#00aae7]/50 text-black bg-[#00aae7]/5"
+                    } ${
+                      isAnswerLocked || timeLeft === 0
+                        ? "cursor-not-allowed"
+                        : "cursor-pointer"
+                    }`}
                     disabled={isAnswerLocked || timeLeft === 0}
                   >
                     {option}
@@ -146,12 +174,16 @@ export default function PlayerGame() {
           ) : (
             <div className="text-center py-8">
               <h3 className="text-xl font-semibold text-miracle-lightGrey">
-                {
-                  gameStatus === 'finished' || isLastQuestion ? <h2>Quiz completed <br/>  Thanks for participating</h2> : "Waiting for the next question..."
-                }
+                {gameStatus === "finished" || isLastQuestion ? (
+                  <h2>
+                     Well done! Your quiz is now complete. <br /> Thanks for joining us!
+                  </h2>
+                ) : (
+                  "Waiting for the next question..."
+                )}
               </h3>
             </div>
-          )}
+          ) : <h3 className="text-xl font-semibold text-center text-miracle-darkGrey">Get ready! The quiz is about to start...</h3>}
         </div>
       </div>
     </div>

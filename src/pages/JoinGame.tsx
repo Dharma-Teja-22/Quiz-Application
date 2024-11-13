@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useGameStore } from '../store/gameStore';
 import { ArrowRight } from 'lucide-react';
 import { SocketContext } from '../context/SocketContext';
+import dsLogo from '../assets/Digital_Summit_24_Logo_Dark.svg'
 
 
 export default function JoinGame() {
@@ -13,6 +14,7 @@ export default function JoinGame() {
   const [name, setName] = useState('');
   const [error, setError] = useState('');
   const setPlayerName = useGameStore((state) => state.setPlayerName);
+  
 
   const handleJoin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,7 +28,7 @@ export default function JoinGame() {
         setPlayerName(name);
         navigate(`/play/${gameId}`);
       } else {
-        setError(response.error || 'Failed to join game');
+        setError(response.error || 'Failed to join quiz');
       }
     });
   };
@@ -34,7 +36,10 @@ export default function JoinGame() {
   return (
     <div className="min-h-full bg-[#EEF7FF] flex items-center justify-center p-4">
       <div className="max-w-md w-full bg-white rounded-lg border border-gray-200 shadow-xl p-8">
-        <h1 className="text-2xl font-bold text-miracle-darkBlue mb-6">Join Game</h1>
+      <div className='flex justify-center'>
+          <img src={dsLogo} width={100} alt="" />
+          </div>
+        <h1 className="text-4xl font-bold text-miracle-darkBlue mb-3 text-center">Join Quiz</h1>
         
         <form onSubmit={handleJoin} className="space-y-6">
           <div>

@@ -12,11 +12,11 @@ export default function QuestionForm() {
     e.preventDefault();
     if (!question.trim() || options.some(opt => !opt.trim())) return;
 
-    addQuestion({
-      question: question.trim(),
-      options: options.map(opt => opt.trim()),
-      correctAnswer
-    });
+    // addQuestion({
+    //   question: question.trim(),
+    //   options: options.map(opt => opt.trim()),
+    //   correctAnswer
+    // });
 
     // Reset form
     setQuestion('');

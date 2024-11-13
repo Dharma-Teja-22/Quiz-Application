@@ -1,7 +1,7 @@
 import { Loader2, Upload } from "lucide-react";
 import React, { useContext, useState } from "react";
-import { useGameStore } from "../store/gameStore";
-import API from "../servies/API";
+import { Question, useGameStore } from "../store/gameStore";
+import API from "../services/API";
 import { useParams } from "react-router-dom";
 import { SocketContext } from "../context/SocketContext";
 
@@ -24,7 +24,7 @@ const CustomUploadButton: React.FC = () => {
         // console.log(response.data.questions)
         if (result) {
           useGameStore.getState().setQuestions(result.questions);
-          socket?.emit("create-game", { gameId, questions: result.questions });
+          socket?.emit("create-game", { gameId, questions: result.questions.map((question : Question) => ({...question,showAnswer : false})) });
         }
       } catch (error) {
         console.error("Error uploading file:", error);

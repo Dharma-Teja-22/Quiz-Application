@@ -2,11 +2,11 @@ import { useContext, useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 // import { useSocket } from '../context/SocketContext';
 import { Play, Pause, SkipForward, Users, Timer, Ban, User } from 'lucide-react';
-import { useGameStore } from '../store/gameStore';
+import { Question, useGameStore } from '../store/gameStore';
 import QuestionList from '../components/QuestionList';
 import { SocketContext } from '../context/SocketContext';
 import { useNavigate } from 'react-router-dom';
-import API from '../servies/API';
+import API from '../services/API';
 
 
 interface Player {
@@ -21,7 +21,7 @@ export default function AdminGame() {
   const gameStatus = useGameStore((state) => state.gameStatus);
   const setGameStatus = useGameStore((state) => state.setGameStatus);
   const questions = useGameStore((state) => state.questions);
-  const [timeLeft, setTimeLeft] = useState<number>(20);
+  const [timeLeft, setTimeLeft] = useState<number>(10);
   const countRef = useRef<number>(0);
   const navigate = useNavigate();
 
@@ -62,7 +62,7 @@ export default function AdminGame() {
         const result = await API.get.getQuestions(gameId);
         if(result){
           // console.log(response)
-          useGameStore.getState().setQuestions(result);
+          useGameStore.getState().setQuestions(result.map((question : Question) => ({...question,showAnswer : false})));
         }
       }
     }
@@ -130,23 +130,6 @@ export default function AdminGame() {
                           Start Quiz
                         </button>
                       )}
-                      {
-                        countRef.current !== questions.length - 1
-                        ? <button
-                            onClick={() => handleGameControl('next')}
-                            className="flex items-center gap-2 bg-[#2368a0] text-[#ffffff] px-3 py-2 rounded-lg hover:bg-[#2368a0]/90 transition-all duration-200 shadow-md"
-                          >
-                            <SkipForward className="w-5 h-5" />
-                            Next Question
-                          </button>
-                        : <button
-                            onClick={() => handleGameControl('end')}
-                            className="flex items-center gap-2 bg-miracle-red/80 text-[#ffffff] px-3 py-2 rounded-lg hover:bg-miracle-red/90 transition-all duration-200 shadow-md"
-                          >
-                            <Ban className="w-5 h-5" />
-                            End Quiz
-                          </button>
-                      }
                       
                     </>
                   )}
@@ -177,7 +160,7 @@ export default function AdminGame() {
                             <User className="w-5 h-5 text-miracle-white" />
                           </div>
                           <div className="flex-1">
-                            <h3 className="font-medium text-miracle-black">{player.name.charAt(0).toLocaleUpperCase() + player.name.substring(1)}</h3>
+                            <h3 className="font-medium text-miracle-black">{(player.name.charAt(0).toLocaleUpperCase() + player.name.substring(1)).substring(0,10)}</h3>
                             <div className="flex items-center mt-1">
                               <span className="text-black text-sm">Score:</span>
                               <span className="text-miracle-black px-2 rounded-full text-sm font-medium">
@@ -194,7 +177,7 @@ export default function AdminGame() {
             </div>
 
             <div className='h-full max-h-[500px] md:max-h-full overflow-scroll no-scrollbar pb-2 border rounded-lg border-gray-200 bg-white shadow-lg'>
-              <QuestionList currentQuestionIndex={countRef.current} />
+              <QuestionList currentQuestionIndex={countRef.current} handleGameControl={handleGameControl} timeLeft={timeLeft}/>
             </div>
           </div>
     </div>
