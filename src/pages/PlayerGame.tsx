@@ -44,7 +44,6 @@ export default function PlayerGame() {
       setGameStarted(JSON.parse(isGameStarted));
       setTimeLeft(JSON.parse(localTimerVaue))
     }
-    if(currentPlayerName) console.log(currentPlayerName,"ok");
     if(localSelectedAnswer && localIsAnswerlocked && localIsLastQuestion){
       setIsAnswerLocked(JSON.parse(localIsAnswerlocked));
       setIsLastQuestion(JSON.parse(localIsLastQuestion));

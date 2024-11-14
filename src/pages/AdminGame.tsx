@@ -5,8 +5,6 @@ import { Play, Pause, SkipForward, Users, Timer, Ban, User } from 'lucide-react'
 import { Question, useGameStore,Player } from '../store/gameStore';
 import QuestionList from '../components/QuestionList';
 import { SocketContext } from '../context/SocketContext';
-import { useNavigate } from 'react-router-dom';
-import API from '../services/API';
 
 
 export default function AdminGame() {
@@ -19,7 +17,6 @@ export default function AdminGame() {
   const [timeLeft, setTimeLeft] = useState<number>(10);
   const countRef = useRef<number>(0);
   const [isGameStarted,setIsGameStarted] = useState(false);
-  const navigate = useNavigate();
 
   useEffect(() => {
     const localGameStatus = localStorage.getItem("localGameStatus") as "waiting" | "playing" | "paused" | "finished" | null;
@@ -86,7 +83,7 @@ export default function AdminGame() {
 
     socket.on('timer', (time,quizId) => {
       if(quizId === gameId){
-        console.log(time);
+        // console.log(time);
         localStorage.setItem("localTimerValue",time+"");
         setTimeLeft(time);
       }
@@ -133,9 +130,7 @@ export default function AdminGame() {
         break;
       case 'end':
         socket.emit('game-action', { gameId, action: 'end' });
-        localStorage.clear();
-        useGameStore.getState().clearState()
-        navigate('/')
+        useGameStore.getState().setGameStatus("finished");
         break;
     }
   };
@@ -151,28 +146,35 @@ export default function AdminGame() {
                   <p className="text-miracle-darkGrey">Quiz ID: {gameId}</p>
                 </div>
                 <div className="flex items-start h-full gap-2">
-                  {questions.length > 0 &&  (
+                  {questions.length > 0 && gameStatus !== "finished" && (
                     <>
                       {gameStatus === 'playing' ? (
                         <button
                           onClick={() => handleGameControl('pause')}
-                          className="flex items-center gap-2 bg-miracle-darkGrey text-[#ffffff] px-2 py-2 rounded-lg hover:bg-miracle-darkGrey/90 transition-all duration-200 shadow-md"
+                          className="flex w-[150px] items-center gap-2 bg-miracle-darkGrey text-[#ffffff] px-2 py-2 rounded-lg hover:bg-miracle-darkGrey/90 transition-all duration-200 shadow-md"
                         >
                           <Pause className="w-5 h-5" />
                           Pause Quiz
                         </button>
-                      ) : (
+                      ) : isGameStarted ?(
                         <button
                           onClick={() => handleGameControl('start')}
                           className="flex items-center gap-2 bg-[#00aae7] text-[#ffffff] px-2 py-2 rounded-lg hover:bg-[#00aae7]/90 transition-all duration-200 shadow-md"
                         >
                           <Play className="w-5 h-5" />
-                          Start Quiz
+                          Resume Quiz
                         </button>
-                      )}
+                      ) : <button
+                      onClick={() => handleGameControl('start')}
+                      className="flex items-center gap-2 bg-[#00aae7] text-[#ffffff] px-2 py-2 rounded-lg hover:bg-[#00aae7]/90 transition-all duration-200 shadow-md"
+                    >
+                      <Play className="w-5 h-5" />
+                      Start Quiz
+                    </button>}
                       
                     </>
                   )}
+                  {/* {gameFinished + ""} */}
                 </div>
               </div>
               <div className="rounded-lg row-span-8 overflow-hidden p-2 px-0">
@@ -184,7 +186,7 @@ export default function AdminGame() {
                     </h2>
                   </div>
                   {
-                    isGameStarted && <div className="flex items-center gap-2 bg-miracle-mediumBlue px-4 py-2 rounded-full">
+                    isGameStarted && gameStatus !== "finished" && <div className="flex items-center gap-2 bg-miracle-mediumBlue px-4 py-2 rounded-full">
                     <Timer className="w-5 h-5 text-miracle-white" />
                     <span className="text-miracle-white font-medium">{timeLeft}s</span>
                   </div>

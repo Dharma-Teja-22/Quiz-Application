@@ -17,6 +17,7 @@ export default function QuestionList({
   const questions = useGameStore((state) => state.questions);
   const removeQuestion = useGameStore((state) => state.removeQuestion);
   const nextBtnRef = useRef<HTMLDivElement | null>(null);
+  const gameStatus = useGameStore((state) => state.gameStatus)
 
   const revealAnswer = () => {
     const newQuestions = questions.map((question,index) => index === currentQuestionIndex ? ({...question,showAnswer : true}) : question);
@@ -57,7 +58,7 @@ export default function QuestionList({
       ?     <div className="space-y-2">
       {questions.slice(0, currentQuestionIndex + 1).map((question, index) => (
         <div
-          key={question.id}
+          key={index}
           ref={index === currentQuestionIndex ? nextBtnRef : null}
           className="group rounded-xl hover:shadow-lg transition-all duration-200 p-3"
         >
@@ -115,7 +116,7 @@ export default function QuestionList({
             Next Question
           </button>
         ) : (
-          <button
+          !(gameStatus === "finished") && <button
             onClick={() => handleGameControl("end")}
             className="flex items-center gap-2 bg-miracle-red/80 text-[#ffffff] px-3 py-2 rounded-lg hover:bg-miracle-red/90 transition-all duration-200 shadow-md"
           >
