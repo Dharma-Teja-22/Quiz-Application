@@ -65,9 +65,7 @@ export default function QuestionList({
             <div className="flex items-start justify-between gap-4">
               <div className="flex gap-3 flex-1">
                 <span
-                  className={`flex-shrink-0 w-8 h-8 rounded-full ${
-                    currentQuestionIndex === index && "bg-miracle-darkBlue"
-                  } bg-[#00aae7] flex items-center justify-center text-miracle-white font-semibold`}
+                  className={`flex-shrink-0 w-8 h-8 rounded-full bg-[#00aae7] flex items-center justify-center text-miracle-white font-semibold`}
                 >
                   {index + 1}
                 </span>
@@ -94,9 +92,6 @@ export default function QuestionList({
                       {String.fromCharCode(65 + optIndex) + "."}
                     </span>
                     <span
-                      className={`${
-                        optIndex === question.correctAnswer ? "font-medium" : ""
-                      }`}
                     >
                       {option}
                     </span>
