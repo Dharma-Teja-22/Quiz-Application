@@ -58,6 +58,15 @@ io.on("connection", (socket) => {
     callback({ success: true })
   })
 
+  socket.on("verify-room",(quizId,callback) => {
+    if(quizzes.has(quizId)){
+      callback({ success: true})
+    }
+    else{
+      callback({success:false})
+    }
+  })
+
   socket.on("join-game", ({ gameId, playerName }, callback) => {
     const game = quizzes.get(gameId);
 
@@ -78,17 +87,18 @@ io.on("connection", (socket) => {
     console.log(game.players)
 
     socket.join(gameId);
-    io.to(game.host).emit("player-joined", {
+    io.emit("player-joined", {
       name: playerName,
       score: 0,
-    });
+    },gameId);
 
     callback({ success: true });
   });
 
   socket.on("game-action", ({ gameId, action }) => {
+    console.log(gameId,action)
     const game = quizzes.get(gameId);
-    if (!game || game.host !== socket.id) return;
+    if (!game) return;
     switch (action) {
       case "start":
         game.status = "playing";
@@ -102,6 +112,7 @@ io.on("connection", (socket) => {
         io.emit("game-paused",gameId);
         break;
       case "next":
+        console.log("called")
         game.currentQuestion++;
         if (game.currentQuestion < game.questions.length) {
           io.emit("game-started",gameId);
@@ -114,6 +125,7 @@ io.on("connection", (socket) => {
       case "end":
         io.emit("end",gameId);
         quizzes.delete(gameId);
+        console.log("after deleting",quizzes.get(gameId));
         break;
     }
   });
@@ -132,10 +144,10 @@ io.on("connection", (socket) => {
     console.log(answer, question);
     if (answer === question.correctAnswer) {
       player.score += (timeLeft * 10);
-      io.to(game.host).emit("score-update", {
+      io.emit("score-update", {
         playerName: playerName,
         newScore: player.score,
-      });
+      },gameId);
     }
   });
 
@@ -152,7 +164,6 @@ io.on("connection", (socket) => {
 function startQuestion(gameId, type) {
   const game = quizzes.get(gameId);
   if (!game) return;
-
   const question = game.questions[game.currentQuestion];
   const isFinalQuestion = game.currentQuestion === game.questions.length-1;
   io.emit("question", question, game.timeLeft, type, isFinalQuestion,gameId);

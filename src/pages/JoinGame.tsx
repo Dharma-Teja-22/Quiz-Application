@@ -65,7 +65,7 @@ export default function JoinGame() {
               type="text"
               id="name"
               value={name}
-              onChange={(e) => setName(e.target.value)}
+              onChange={(e) => setName(e.target.value.trim())}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg  focus:border-transparent"
               placeholder="Enter your name"
             />

@@ -8,6 +8,11 @@ export interface Question {
   showAnswer : boolean
 }
 
+export interface Player {
+  name: string;
+  score: number;
+}
+
 interface GameState {
   gameId: string | null;
   isAuthenticated : boolean;
@@ -17,6 +22,7 @@ interface GameState {
   score: number;
   gameStatus: 'waiting' | 'playing' | 'paused' | 'finished';
   questions: Question[];
+  students : Player[];
   setGameId: (id: string) => void;
   setIsAuthenticated : (value : boolean) => void;
   setPlayerName: (name: string) => void;
@@ -27,6 +33,7 @@ interface GameState {
   addQuestion: (question: Omit<Question, 'id'>) => void;
   removeQuestion: (id: number) => void;
   setQuestions: (questions: Question[]) => void;
+  clearState : () => void;
 }
 
 export const useGameStore = create<GameState>((set) => ({
@@ -38,6 +45,7 @@ export const useGameStore = create<GameState>((set) => ({
   score: 0,
   gameStatus: 'waiting',
   questions: [],
+  students : [],
   setGameId: (id) => set({ gameId: id }),
   setIsAuthenticated : (value) => set({isAuthenticated : value}),
   setPlayerName: (name) => set({ playerName: name }),
@@ -52,5 +60,13 @@ export const useGameStore = create<GameState>((set) => ({
     questions: state.questions.filter(q => q.id !== id)
   })),
   setQuestions: (questions) => set({ questions }),
-
+  clearState : () => set({gameId: null,
+    isAuthenticated : false,
+    playerName: '',
+    isAdmin: false,
+    currentQuestion: 0,
+    score: 0,
+    gameStatus: 'waiting',
+    questions: [],
+    students : []})
 }));

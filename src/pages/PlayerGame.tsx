@@ -55,6 +55,12 @@ export default function PlayerGame() {
   useEffect(() => {
     if (!socket) return;
 
+    socket.emit("verify-room",gameId,(response: { success: boolean, error?: string }) => {
+      if(!response.success){
+        navigate("/")
+      }
+    })
+
     socket.on("question", (question, timeLeft, type, isFinalQuestion,quizId) => {
       if(quizId === gameId){
         if (type === "next") {

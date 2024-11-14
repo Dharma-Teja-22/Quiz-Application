@@ -23,6 +23,7 @@ const CustomUploadButton: React.FC = () => {
         const result = await API.post.uploadExcel(formData, gameId);
         // console.log(response.data.questions)
         if (result) {
+          localStorage.setItem("localQuestions",JSON.stringify(result.questions))
           useGameStore.getState().setQuestions(result.questions);
           socket?.emit("create-game", { gameId, questions: result.questions.map((question : Question) => ({...question,showAnswer : false})) });
         }

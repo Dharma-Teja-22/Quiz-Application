@@ -8,11 +8,16 @@ import PlayerGame from "../pages/PlayerGame";
 import JoinGame from "../pages/JoinGame";
 import LoginForm from "../pages/LoginForm";
 import { useGameStore } from "@/store/gameStore";
+import {useEffect} from 'react'
+import NotFound from '../pages/NotFound'
 
 export default function Layout() {
   const isAunthenticated = useGameStore((state) => state.isAuthenticated);
 
-  
+  useEffect(() => {
+    const user = localStorage.getItem("userData");
+    if(user) useGameStore.getState().setIsAuthenticated(true);
+  },[isAunthenticated])
 
   return (
     <div className="h-screen grid grid-rows-12 bg-[#EEF7FF]">
@@ -31,6 +36,7 @@ export default function Layout() {
 
           <Route path="/play/:gameId" element={<PlayerGame />} />
           <Route path="/join" element={<JoinGame />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </div>
       <Footer />

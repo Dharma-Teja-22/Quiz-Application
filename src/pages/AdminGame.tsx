@@ -2,17 +2,12 @@ import { useContext, useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 // import { useSocket } from '../context/SocketContext';
 import { Play, Pause, SkipForward, Users, Timer, Ban, User } from 'lucide-react';
-import { Question, useGameStore } from '../store/gameStore';
+import { Question, useGameStore,Player } from '../store/gameStore';
 import QuestionList from '../components/QuestionList';
 import { SocketContext } from '../context/SocketContext';
 import { useNavigate } from 'react-router-dom';
 import API from '../services/API';
 
-
-interface Player {
-  name: string;
-  score: number;
-}
 
 export default function AdminGame() {
   const { gameId } = useParams();
@@ -23,30 +18,78 @@ export default function AdminGame() {
   const questions = useGameStore((state) => state.questions);
   const [timeLeft, setTimeLeft] = useState<number>(10);
   const countRef = useRef<number>(0);
+  const [isGameStarted,setIsGameStarted] = useState(false);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const localGameStatus = localStorage.getItem("localGameStatus") as "waiting" | "playing" | "paused" | "finished" | null;
+    const localQuestions = localStorage.getItem("localQuestions");
+    // console.log(localQuestions)
+    const localStudents = localStorage.getItem("localStudents");
+    const localcurrentQuestion = localStorage.getItem("localcurrentQuestion");
+    const localTimerValue = localStorage.getItem("localTimerValue");
+    const localIsGameStarted = localStorage.getItem("localIsGameStarted");
+
+    if(localIsGameStarted){
+      setIsGameStarted(JSON.parse(localIsGameStarted))
+    }
+
+    if(localTimerValue){
+      setTimeLeft(JSON.parse(localTimerValue))
+    }
+
+    if(localGameStatus){
+      useGameStore.getState().setGameStatus(localGameStatus);
+    }
+    if(localQuestions){
+      useGameStore.getState().setQuestions(JSON.parse(localQuestions));
+    }
+    if(localStudents){
+      setStudents(JSON.parse(localStudents));
+    }
+    if(localcurrentQuestion){
+      countRef.current = JSON.parse(localcurrentQuestion);
+    }
+  },[])
 
   useEffect(() => {
     if (!socket) return;
 
-    socket.on('player-joined', (playerData) => {
-      setStudents((current) => [...current, playerData]);
+    socket.on('player-joined', (playerData,quizId) => {
+      console.log(playerData,quizId)
+      if(quizId === gameId){
+        setStudents((current) => {
+          const newStudents = [...current, playerData];
+          localStorage.setItem("localStudents",JSON.stringify(newStudents))
+          return newStudents;
+      });
+      }
     });
 
     socket.on('player-left', (playerId) => {
       setStudents((current) => current.filter(p => p.name !== playerId));
     });
 
-    socket.on('score-update', ({ playerName, newScore }) => {
+    socket.on('score-update', ({ playerName, newScore },quizId) => {
+      if(quizId === gameId){
       console.log("updated score")
-      setStudents((current) =>
-        current.map(p => p.name === playerName ? { ...p, score: newScore } : p)
-        .sort((a, b) => b.score - a.score)
+      setStudents((current) => {
+        const newStudents = current.map(p => p.name === playerName ? { ...p, score: newScore } : p)
+        .sort((a, b) => b.score - a.score);
+        localStorage.setItem("localStudents",JSON.stringify(newStudents))
+        return newStudents;
+      }
       );
+      
+    }
     });
 
-    socket.on('timer', (time) => {
-      console.log(time);
-      setTimeLeft(time);
+    socket.on('timer', (time,quizId) => {
+      if(quizId === gameId){
+        console.log(time);
+        localStorage.setItem("localTimerValue",time+"");
+        setTimeLeft(time);
+      }
     });
 
     return () => {
@@ -56,46 +99,42 @@ export default function AdminGame() {
     };
   }, [socket, gameId, questions]);
 
-  const fetchQuestions = async () => {
-    console.log("hello")
-    try{
-      if(gameId){
-        const result = await API.get.getQuestions(gameId);
-        if(result){
-          // console.log(response)
-          useGameStore.getState().setQuestions(result.map((question : Question) => ({...question,showAnswer : false})));
-        }
-      }
-    }
-    catch(err){
-      console.log(err);
-    }
-  }
 
-  useEffect(() => {
-    fetchQuestions();
-  },[])
+  const formatName = (name : string) => {
+    return name.length > 10 ? name.substring(0, 10) + '...' : name;
+  }
 
   const handleGameControl = (action: 'start' | 'pause' | 'next' | 'end') => {
     console.log(questions.length,socket)
     if (!socket || questions.length === 0) return;
 
+    if(action !== "end"){
+      setIsGameStarted(true);
+      localStorage.setItem("localIsGameStarted","true");
+    }
+
     switch (action) {
       case 'start':
         socket.emit('game-action', { gameId, action: 'start' });
+        localStorage.setItem("localGameStatus","playing");
         setGameStatus('playing');
         break;
       case 'pause':
         socket.emit('game-action', { gameId, action: 'pause' });
+        localStorage.setItem("localGameStatus","paused");
         setGameStatus('paused');
         break;
       case 'next':
         countRef.current+=1;
         setGameStatus('playing')
-        socket.emit('game-action', { gameId, action: 'next',isLastQuestion : countRef.current === questions.length-1 });
+        localStorage.setItem("localGameStatus","playing");
+        localStorage.setItem("localcurrentQuestion",countRef.current+"");
+        socket.emit('game-action', { gameId, action: 'next' });
         break;
       case 'end':
         socket.emit('game-action', { gameId, action: 'end' });
+        localStorage.clear();
+        useGameStore.getState().clearState()
         navigate('/')
         break;
     }
@@ -105,7 +144,7 @@ export default function AdminGame() {
     <div className='h-full bg-[#EEF7FF]'>
           <div className="overflow-auto w-full h-full lg:grid mx-auto lg:grid-cols-2 lg:grid-rows-1 gap-3 p-2">
 
-            <div className="h-fit md:h-full bg-white mb-3 p-2 xl:p-5 col-span-1 rounded-lg border border-gray-200 shadow-lg md:mb-0">
+            <div className="h-fit md:h-full bg-white mb-3 p-2 xl:p-5 col-span-1 rounded-lg border border-gray-200 md:mb-0">
               <div className="flex flex-col md:flex-row justify-between items-start sm:items-center gap-4 mb-3 row-span-2">
                 <div>
                   <h1 className="text-2xl font-bold text-miracle-darkBlue">Quiz Control Panel</h1>
@@ -144,10 +183,13 @@ export default function AdminGame() {
                       Students ({students.length})
                     </h2>
                   </div>
-                  <div className="flex items-center gap-2 bg-miracle-lightBlue px-4 py-2 rounded-full">
+                  {
+                    isGameStarted && <div className="flex items-center gap-2 bg-miracle-mediumBlue px-4 py-2 rounded-full">
                     <Timer className="w-5 h-5 text-miracle-white" />
                     <span className="text-miracle-white font-medium">{timeLeft}s</span>
                   </div>
+                  }
+                  
                 </div>
                 {students.length > 0 ? (
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-2 h-[300px] md:h-full overflow-scroll no-scrollbar pb-5 md:pb-12">
@@ -161,7 +203,7 @@ export default function AdminGame() {
                             <User className="w-5 h-5 text-miracle-white" />
                           </div>
                           <div className="flex-1">
-                            <h3 className="font-medium text-miracle-black">{(player.name.charAt(0).toLocaleUpperCase() + player.name.substring(1)).substring(0,10)}</h3>
+                            <h3 className="font-medium text-miracle-black">{formatName(player.name)}</h3>
                             <div className="flex items-center mt-1">
                               <span className="text-black text-sm">Score:</span>
                               <span className="text-miracle-black px-2 rounded-full text-sm font-medium">
@@ -177,8 +219,8 @@ export default function AdminGame() {
               </div>
             </div>
 
-            <div className='h-full max-h-[500px] md:max-h-full overflow-scroll no-scrollbar pb-2 border rounded-lg border-gray-200 bg-white shadow-lg'>
-              <QuestionList currentQuestionIndex={countRef.current} handleGameControl={handleGameControl} timeLeft={timeLeft}/>
+            <div className='h-full max-h-[500px] md:max-h-full overflow-scroll no-scrollbar pb-2 border rounded-lg border-gray-200 bg-white'>
+              <QuestionList currentQuestionIndex={countRef.current} handleGameControl={handleGameControl} timeLeft={timeLeft} isGameStarted={isGameStarted}/>
             </div>
           </div>
     </div>

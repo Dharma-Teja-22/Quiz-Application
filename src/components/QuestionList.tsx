@@ -6,11 +6,13 @@ import { useEffect, useRef } from "react";
 export default function QuestionList({
   currentQuestionIndex,
   handleGameControl,
-  timeLeft
+  timeLeft,
+  isGameStarted
 }: {
   currentQuestionIndex: number;
   handleGameControl : (action: "start" | "pause" | "next" | "end") => void,
-  timeLeft : number
+  timeLeft : number,
+  isGameStarted : boolean
 }) {
   const questions = useGameStore((state) => state.questions);
   const removeQuestion = useGameStore((state) => state.removeQuestion);
@@ -18,6 +20,7 @@ export default function QuestionList({
 
   const revealAnswer = () => {
     const newQuestions = questions.map((question,index) => index === currentQuestionIndex ? ({...question,showAnswer : true}) : question);
+    localStorage.setItem("localQuestions",JSON.stringify(newQuestions));
     useGameStore.getState().setQuestions(newQuestions);
   }
 
@@ -48,7 +51,10 @@ export default function QuestionList({
   }
 
   return (
-    <div className="space-y-2">
+    <>
+    {
+      isGameStarted
+      ?     <div className="space-y-2">
       {questions.slice(0, currentQuestionIndex + 1).map((question, index) => (
         <div
           key={question.id}
@@ -125,5 +131,14 @@ export default function QuestionList({
       </div>
 
     </div>
+    :
+    <div className="text-center py-8 rounded-xl h-full w-full flex flex-col justify-center items-center">
+        <div className="text-miracle-darkGrey font-bold sm:text-base p-4 md:p-0">
+        Click Start Quiz to reveal the quiz questions.
+        </div>
+      </div>
+    }
+    </>
+
   );
 }

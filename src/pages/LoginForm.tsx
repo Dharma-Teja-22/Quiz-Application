@@ -43,8 +43,6 @@ export default function LoginForm() {
   const onSubmit = async (data : any) => {
     setIsLoading(true);
     try {
-      useGameStore.getState().setIsAuthenticated(true)
-      navigate("/create");
       const response = await hubbleService.post.authHubbleLogin(data);
       console.log(response);
 
@@ -67,7 +65,8 @@ export default function LoginForm() {
         localStorage.setItem("userId", data.username);
         localStorage.setItem("userName", firstName);
         // setAuthenticated(true);
-
+        useGameStore.getState().setIsAuthenticated(true)
+        navigate("/create");
       } else {
         toast({
           title: "Login failed",
