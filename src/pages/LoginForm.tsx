@@ -12,6 +12,7 @@ import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import hubbleService from "@/services/hubble.service";
 import { useGameStore } from '../store/gameStore';
+import dsLogo from '../assets/Digital_Summit_24_Logo_Dark.svg'
 
 
 const loginSchema = z.object({
@@ -42,6 +43,8 @@ export default function LoginForm() {
   const onSubmit = async (data : any) => {
     setIsLoading(true);
     try {
+      useGameStore.getState().setIsAuthenticated(true)
+      navigate("/create");
       const response = await hubbleService.post.authHubbleLogin(data);
       console.log(response);
 
@@ -64,8 +67,7 @@ export default function LoginForm() {
         localStorage.setItem("userId", data.username);
         localStorage.setItem("userName", firstName);
         // setAuthenticated(true);
-        useGameStore.getState().setIsAuthenticated(true)
-        navigate("/create");
+
       } else {
         toast({
           title: "Login failed",
@@ -74,6 +76,7 @@ export default function LoginForm() {
           duration: 2000,
         });
       }
+
     } catch (error) {
       console.error("Error during login:", error);
       toast({
@@ -94,14 +97,17 @@ export default function LoginForm() {
   return (
     <div className="flex justify-center items-center h-full">
             <div className="relative bg-white p-6 sm:p-8 rounded-lg shadow-lg w-full max-w-[90%] sm:max-w-md">
-      <div className="flex justify-center mb-4">
+      {/* <div className="flex justify-center mb-4">
         <span className="text-5xl font-bold text-miracle-darkBlue">
           <span className="text-miracle-lightBlue">Quiz </span>Master
         </span>
-      </div>
-      <hr className="border-b border-[#B7B2B3] mb-6 sm:mb-8" />
+      </div> */}
+                <div className='flex justify-center'>
+          <img src={dsLogo} width={100} alt="" />
+          </div>
+      {/* <hrjj className="border-b border-[#B7B2B3] mb-6 sm:mb-8" /> */}
 
-      <h2 className="text-xl sm:text-2xl font-bold text-center text-gray-800 mb-4">
+      <h2 className="text-4xl font-bold text-miracle-darkBlue mb-2 text-center">
         SIGN IN
       </h2>
 

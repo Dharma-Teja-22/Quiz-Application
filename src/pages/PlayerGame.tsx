@@ -1,6 +1,5 @@
-import { Timer } from "lucide-react";
 import { useContext, useEffect, useRef, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 // import { useSocket } from '../context/SocketContext';
 import { useGameStore } from "../store/gameStore";
 import { SocketContext } from "../context/SocketContext";
@@ -23,57 +22,91 @@ export default function PlayerGame() {
   const gameStatus = useGameStore((state) => state.gameStatus);
   const playerName = useGameStore((state) => state.playerName);
   const [isLastQuestion, setIsLastQuestion] = useState(false);
-  const selectedAnswerRef = useRef(selectedAnswer);
   const [gameStarted,setGameStarted] = useState<boolean>(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    selectedAnswerRef.current = selectedAnswer;
-  }, [selectedAnswer]);
-
-  // useEffect(() => {
-  //   const currentLocalQuestion = localStorage.getItem("currentLocalQuestion");
-  //   if (currentLocalQuestion) {
-  //     console.log(Object.keys(currentLocalQuestion));
-  //     setCurrentQuestion(JSON.parse(currentLocalQuestion));
-  //   }
-  // }, []);
+    const currentLocalQuestion = localStorage.getItem("currentLocalQuestion");
+    const currentPlayerName = localStorage.getItem("currentPlayerName");
+    const localGameStatus = localStorage.getItem("gameStatus") as "waiting" | "playing" | "paused" | "finished" | null;
+    const isGameStarted =localStorage.getItem("gameStarted");
+    const localTimerVaue = localStorage.getItem("localTimerVaue");
+    const localIsAnswerlocked = localStorage.getItem("localIsAnswerlocked");
+    const localSelectedAnswer = localStorage.getItem("localSelectedAnswer");
+    const localIsLastQuestion = localStorage.getItem("localIsLastQuestion");
+    if(currentPlayerName){
+      useGameStore.getState().setPlayerName(currentPlayerName);
+    }
+     if (currentLocalQuestion && localTimerVaue && isGameStarted && localGameStatus && ["waiting", "playing", "paused", "finished"].includes(gameStatus)) {
+      console.log("entered");
+      setCurrentQuestion(JSON.parse(currentLocalQuestion));
+      useGameStore.getState().setGameStatus(localGameStatus);
+      setGameStarted(JSON.parse(isGameStarted));
+      setTimeLeft(JSON.parse(localTimerVaue))
+    }
+    if(currentPlayerName) console.log(currentPlayerName,"ok");
+    if(localSelectedAnswer && localIsAnswerlocked && localIsLastQuestion){
+      setIsAnswerLocked(JSON.parse(localIsAnswerlocked));
+      setIsLastQuestion(JSON.parse(localIsLastQuestion));
+      setSelectedAnswer(JSON.parse(localSelectedAnswer))
+    }
+  }, []);
 
   useEffect(() => {
     if (!socket) return;
 
-    socket.on("question", (question, timeLeft, type, isFinalQuestion) => {
-      if (type === "next") {
-        setSelectedAnswer(null);
-        setIsAnswerLocked(false);
-        setIsLastQuestion(isFinalQuestion);
-      } else if (selectedAnswerRef.current === null) {
-        setSelectedAnswer(null);
-        setIsAnswerLocked(false);
+    socket.on("question", (question, timeLeft, type, isFinalQuestion,quizId) => {
+      if(quizId === gameId){
+        if (type === "next") {
+          localStorage.setItem("localSelectedAnswer","null");
+          localStorage.setItem("localIsAnswerlocked","false");
+          localStorage.setItem("localIsLastQuestion",JSON.stringify(isFinalQuestion));
+          setSelectedAnswer(null);
+          setIsAnswerLocked(false);
+          setIsLastQuestion(isFinalQuestion);
+        }
+        localStorage.setItem("currentLocalQuestion", JSON.stringify(question));
+        setCurrentQuestion(question);
+        setTimeLeft(timeLeft);
+        setGameStarted(true)
+        localStorage.setItem("gameStarted","true");
       }
-      console.log("selectedAnswer : " + selectedAnswerRef.current);
-      localStorage.setItem("currentLocalQuestion", JSON.stringify(question));
-      setCurrentQuestion(question);
-      setTimeLeft(timeLeft);
-      setGameStarted(true)
+
     });
 
-    socket.on("end", () => {
-      useGameStore.getState().setGameStatus("finished");
+    socket.on("end", (quizId) => {
+      if(quizId === gameId){
+        useGameStore.getState().setGameStatus("finished");
+        localStorage.clear();
+        navigate("/");
+      }
     });
 
-    socket.on("timer", (time) => {
-      setTimeLeft(time);
+    socket.on("timer", (time,quizId) => {
+      if(quizId === gameId){
+        setTimeLeft(time);
+        localStorage.setItem("localTimerVaue",time+"")
+      }
     });
 
-    socket.on("game-paused", () => {
-      useGameStore.getState().setGameStatus("paused");
+    socket.on("game-paused", (quizId) => {
+      if(quizId === gameId){
+        useGameStore.getState().setGameStatus("paused");
+        localStorage.setItem('gameStatus',"paused");
+      }
     });
-    socket.on("game-started", () => {
-      useGameStore.getState().setGameStatus("playing");
+    socket.on("game-started", (quizId) => {
+      if(quizId === gameId){
+        useGameStore.getState().setGameStatus("playing");
+        localStorage.setItem('gameStatus',"playing");
+      }
     });
 
-    socket.on("game-resumed", () => {
-      useGameStore.getState().setGameStatus("playing");
+    socket.on("game-resumed", (quizId) => {
+      if(quizId === gameId){
+        useGameStore.getState().setGameStatus("playing");
+        localStorage.setItem('gameStatus',"playing");
+      }
     });
 
     return () => {
@@ -87,6 +120,9 @@ export default function PlayerGame() {
   const handleAnswerSelect = (answerIndex: number) => {
     console.log(answerIndex, isAnswerLocked, gameStatus);
     if (isAnswerLocked || gameStatus !== "playing") return;
+
+    localStorage.setItem("localSelectedAnswer",answerIndex+"");
+    localStorage.setItem("localIsAnswerlocked","true");
 
     setSelectedAnswer(answerIndex);
     setIsAnswerLocked(true);
@@ -156,7 +192,7 @@ export default function PlayerGame() {
                     key={index}
                     onClick={() => handleAnswerSelect(index)}
                     className={`p-4 text-left transition-all rounded-lg ${
-                      selectedAnswerRef.current === index
+                      selectedAnswer === index
                         ? "bg-miracle-lightBlue text-white"
                         : "ring-2 ring-[#00aae7]/50 text-black bg-[#00aae7]/5"
                     } ${

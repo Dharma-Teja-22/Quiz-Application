@@ -57,6 +57,7 @@ export default function AdminGame() {
   }, [socket, gameId, questions]);
 
   const fetchQuestions = async () => {
+    console.log("hello")
     try{
       if(gameId){
         const result = await API.get.getQuestions(gameId);

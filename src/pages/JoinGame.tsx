@@ -25,6 +25,7 @@ export default function JoinGame() {
 
     socket && socket.emit('join-game', { gameId, playerName: name }, (response: { success: boolean, error?: string }) => {
       if (response.success) {
+        localStorage.setItem("currentPlayerName",name);
         setPlayerName(name);
         navigate(`/play/${gameId}`);
       } else {

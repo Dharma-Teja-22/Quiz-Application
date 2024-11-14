@@ -23,7 +23,8 @@ const io = new Server(httpServer, {
   },
 });
 
-app.use(cors({ origin: ["http://172.17.10.127:5173"] }));
+// app.use(cors({ origin: ["http://172.17.10.127:5173"] }));
+app.use(cors())
 
 const upload = multer({ dest: "uploads/" }); // Configure multer for file uploads
 
@@ -91,19 +92,19 @@ io.on("connection", (socket) => {
     switch (action) {
       case "start":
         game.status = "playing";
-        io.to(gameId).emit("game-started");
+        io.emit("game-started",gameId);
         startQuestion(gameId, "start");
         break;
       case "pause":
         game.status = "paused";
         console.log("pause");
         if (game.timer) clearInterval(game.timer);
-        io.to(gameId).emit("game-paused");
+        io.emit("game-paused",gameId);
         break;
       case "next":
         game.currentQuestion++;
         if (game.currentQuestion < game.questions.length) {
-          io.to(gameId).emit("game-started");
+          io.emit("game-started",gameId);
           game.timerVal = 10;
           startQuestion(gameId, "next");
         } else {
@@ -111,12 +112,8 @@ io.on("connection", (socket) => {
         }
         break;
       case "end":
-        io.to(gameId).emit("end");
-        quizzes.forEach((game, gameId) => {
-          if (game.host === socket.id) {
-            quizzes.delete(gameId);
-            io.to(gameId).emit("game-ended");
-          }})
+        io.emit("end",gameId);
+        quizzes.delete(gameId);
         break;
     }
   });
@@ -158,7 +155,7 @@ function startQuestion(gameId, type) {
 
   const question = game.questions[game.currentQuestion];
   const isFinalQuestion = game.currentQuestion === game.questions.length-1;
-  io.to(gameId).emit("question", question, game.timeLeft, type, isFinalQuestion);
+  io.emit("question", question, game.timeLeft, type, isFinalQuestion,gameId);
 
   let timeLeft = game.timerVal;
   if (game.timer) clearInterval(game.timer);
@@ -166,8 +163,7 @@ function startQuestion(gameId, type) {
   game.timer = setInterval(() => {
     if (timeLeft > 0) timeLeft--;
     game.timerVal = timeLeft;
-    io.to(gameId).emit("timer", timeLeft);
-    io.to(game.host).emit("timer", timeLeft);
+    io.emit("timer", timeLeft,gameId);
     if (timeLeft <= 0) {
       clearInterval(game.timer);
     }
