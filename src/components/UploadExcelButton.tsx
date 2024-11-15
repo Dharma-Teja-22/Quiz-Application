@@ -5,7 +5,7 @@ import API from "../services/API";
 import { useParams } from "react-router-dom";
 import { SocketContext } from "../context/SocketContext";
 
-const CustomUploadButton: React.FC = () => {
+const CustomUploadButton = ({handleError,handleFileName}:{handleError : (msg : string | null) => void,handleFileName : (name : string) => void}) => {
   const [isUploading, setIsUploading] = useState<boolean>(false);
   const { gameId } = useParams();
   const socket = useContext(SocketContext);
@@ -15,7 +15,12 @@ const CustomUploadButton: React.FC = () => {
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
     const file = event.target.files?.[0];
+    handleError(null)
     if (file) {
+        if(!file.name.includes("xlsx")){
+            handleError("Invalid file format")
+            return;
+        }
       setIsUploading(true);
       const formData = new FormData();
       formData.append("file", file);
@@ -23,12 +28,13 @@ const CustomUploadButton: React.FC = () => {
         const result = await API.post.uploadExcel(formData, gameId);
         // console.log(response.data.questions)
         if (result) {
+          handleFileName(file.name);
           localStorage.setItem("localQuestions",JSON.stringify(result.questions))
           useGameStore.getState().setQuestions(result.questions);
           socket?.emit("create-game", { gameId, questions: result.questions.map((question : Question) => ({...question,showAnswer : false})) });
         }
       } catch (error) {
-        console.error("Error uploading file:", error);
+        handleError("Error uploading file:");
       } finally {
         setIsUploading(false);
       }

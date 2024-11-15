@@ -5,7 +5,16 @@ import { Play, Pause, SkipForward, Users, Timer, Ban, User } from 'lucide-react'
 import { Question, useGameStore,Player } from '../store/gameStore';
 import QuestionList from '../components/QuestionList';
 import { SocketContext } from '../context/SocketContext';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 
+export const formatName = (name : string) => {
+  return name.length > 10 ? name.substring(0, 10) + '...' : name;
+}
 
 export default function AdminGame() {
   const { gameId } = useParams();
@@ -48,6 +57,10 @@ export default function AdminGame() {
       countRef.current = JSON.parse(localcurrentQuestion);
     }
   },[])
+
+  const handleTimeLeft= (time : number) => {
+    setTimeLeft(time)
+  }
 
   useEffect(() => {
     if (!socket) return;
@@ -97,10 +110,6 @@ export default function AdminGame() {
   }, [socket, gameId, questions]);
 
 
-  const formatName = (name : string) => {
-    return name.length > 10 ? name.substring(0, 10) + '...' : name;
-  }
-
   const handleGameControl = (action: 'start' | 'pause' | 'next' | 'end') => {
     console.log(questions.length,socket)
     if (!socket || questions.length === 0) return;
@@ -139,8 +148,8 @@ export default function AdminGame() {
     <div className='h-full bg-[#EEF7FF]'>
           <div className="overflow-auto w-full h-full lg:grid mx-auto lg:grid-cols-2 lg:grid-rows-1 gap-3 p-2">
 
-            <div className="h-fit md:h-full bg-white mb-3 p-2 xl:p-5 col-span-1 rounded-lg border border-gray-200 md:mb-0">
-              <div className="flex flex-col md:flex-row justify-between items-start sm:items-center gap-4 mb-3 row-span-2">
+            <div className="h-fit grid md:grid-rows-8 grid-rows-5 md:h-full bg-white mb-3 p-2 xl:p-5 col-span-1 rounded-lg border border-gray-200 md:mb-0">
+              <div className="flex flex-col row-span-1 md:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
                   <h1 className="text-2xl font-bold text-miracle-darkBlue">Quiz Control Panel</h1>
                   <p className="text-miracle-darkGrey">Quiz ID: {gameId}</p>
@@ -177,7 +186,7 @@ export default function AdminGame() {
                   {/* {gameFinished + ""} */}
                 </div>
               </div>
-              <div className="rounded-lg row-span-8 overflow-hidden p-2 px-0">
+              <div className="rounded-lg md:row-span-7 row-span-4 overflow-hidden p-2 px-0">
                 <div className="flex flex-row items-center justify-between gap-4 mb-2">
                   <div className='flex gap-2 items-center'>
                     <Users className="w-5 h-5 text-miracle-black" />
@@ -193,24 +202,39 @@ export default function AdminGame() {
                   }
                   
                 </div>
+                <div className='overflow-hidden h-full'>
                 {students.length > 0 ? (
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-2 h-[300px] md:h-full overflow-scroll no-scrollbar pb-5 md:pb-12">
                     {students.map((player) => (
                       <div
                         key={player.name}
-                        className="bg-white rounded-lg py-2 px-1 transition-all duration-200 border border-gray-200 shadow-lg max-h-[70px]"
+                        className="bg-white rounded-lg py-2 px-1 transition-all duration-200 border border-gray-200 shadow-md max-h-[70px]"
                       >
-                        <div className="flex items-start gap-3">
-                          <div className="bg-miracle-lightBlue p-2 rounded-full">
-                            <User className="w-5 h-5 text-miracle-white" />
+                        <div className="flex items-center gap-3 justify-between">
+                          <div className='flex items-center'>
+                            <div className="bg-miracle-lightBlue/40 p-2 rounded-full">
+                              <img
+                                src={`https://api.dicebear.com/9.x/avataaars/svg?seed=${player.name}`}
+                                alt="avatar" width={20}/>
+                            </div>
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                <h3 className="font-medium ml-2 text-miracle-black">{formatName(player.name)}</h3>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>{player.name}</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                            
                           </div>
-                          <div className="flex-1">
-                            <h3 className="font-medium text-miracle-black">{formatName(player.name)}</h3>
-                            <div className="flex items-center mt-1">
-                              <span className="text-black text-sm">Score:</span>
-                              <span className="text-miracle-black px-2 rounded-full text-sm font-medium">
-                                {player.score}
-                              </span>
+                          <div className="flex justify-between items-center h-full">
+                            <div className="flex items-center">
+                            Score: {player.score}
+                              {/* <span className="text-miracle-black px-2 rounded-full text-sm font-medium"> */}
+                              
+                              {/* </span> */}
                             </div>
                           </div>
                         </div>
@@ -218,11 +242,12 @@ export default function AdminGame() {
                     ))}
                   </div>
                 ) : <div className='flex justify-center md:h-[350px] text-miracle-darkGrey font-bold items-center'>Waiting for Students to join...</div> }
+                </div>
               </div>
             </div>
 
             <div className='h-full max-h-[500px] md:max-h-full overflow-scroll no-scrollbar pb-2 border rounded-lg border-gray-200 bg-white'>
-              <QuestionList currentQuestionIndex={countRef.current} handleGameControl={handleGameControl} timeLeft={timeLeft} isGameStarted={isGameStarted}/>
+              <QuestionList currentQuestionIndex={countRef.current} handleGameControl={handleGameControl} timeLeft={timeLeft} handleTimeLeft={handleTimeLeft} isGameStarted={isGameStarted}/>
             </div>
           </div>
     </div>

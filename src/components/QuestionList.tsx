@@ -1,23 +1,27 @@
 import { Ban, SkipForward, Trash2 } from "lucide-react";
 import { useGameStore } from "../store/gameStore";
 import UploadExcelButton from "./UploadExcelButton";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef,useState } from "react";
 
 export default function QuestionList({
   currentQuestionIndex,
   handleGameControl,
   timeLeft,
+  handleTimeLeft,
   isGameStarted
 }: {
   currentQuestionIndex: number;
   handleGameControl : (action: "start" | "pause" | "next" | "end") => void,
   timeLeft : number,
+  handleTimeLeft : (time : number) => void;
   isGameStarted : boolean
 }) {
   const questions = useGameStore((state) => state.questions);
-  const removeQuestion = useGameStore((state) => state.removeQuestion);
-  const nextBtnRef = useRef<HTMLDivElement | null>(null);
+  const lastQuestionRef = useRef<HTMLDivElement | null>(null);
+  const nextBtnRef = useRef<HTMLButtonElement | null>(null);
   const gameStatus = useGameStore((state) => state.gameStatus)
+  const [fileName,setFileName] = useState<string>("");
+  const [error,setError] = useState<string | null>(null)
 
   const revealAnswer = () => {
     const newQuestions = questions.map((question,index) => index === currentQuestionIndex ? ({...question,showAnswer : true}) : question);
@@ -25,28 +29,37 @@ export default function QuestionList({
     useGameStore.getState().setQuestions(newQuestions);
   }
 
+  const handleError = (msg : string | null) => {
+    setError(msg)
+  }
+
   useEffect(() => {
     if(timeLeft == 0){
       revealAnswer();
+      nextBtnRef.current?.scrollIntoView({ behavior: 'smooth' });
     }
   },[timeLeft])
 
   useEffect(() => {
-    if(nextBtnRef){
-      nextBtnRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if(lastQuestionRef){
+      lastQuestionRef.current?.scrollIntoView({ behavior: 'smooth' });
     }
   },[currentQuestionIndex])
 
+  const handleFileName = (name : string) => {
+    setFileName(name)
+  }
 
   if (questions.length === 0) {
     return (
       <div className="text-center py-8 rounded-xl h-full w-full flex flex-col justify-center items-center">
         <div className="text-miracle-darkGrey font-bold sm:text-base">
-          Add questions to start the game!
+          Add questions to start the Quiz!
         </div>
         <div className="mt-3">
-          <UploadExcelButton />
+          <UploadExcelButton handleError={handleError} handleFileName={handleFileName} />
         </div>
+        {error && <p className="text-red-600 mt-2">{error}</p>}
       </div>
     );
   }
@@ -59,7 +72,7 @@ export default function QuestionList({
       {questions.slice(0, currentQuestionIndex + 1).map((question, index) => (
         <div
           key={index}
-          ref={index === currentQuestionIndex ? nextBtnRef : null}
+          ref={index === currentQuestionIndex ? lastQuestionRef : null}
           className="group rounded-xl hover:shadow-lg transition-all duration-200 p-3"
         >
           <div className="flex flex-col gap-4">
@@ -74,13 +87,6 @@ export default function QuestionList({
                   {question.question}
                 </h4>
               </div>
-              <button
-                onClick={() => removeQuestion(question.id)}
-                className="flex-shrink-0 p-2 text-[#8c8c8c] hover:text-[#ef4048] hover:bg-[#ef4048]/10 rounded-lg transition-colors duration-200 opacity-0 group-hover:opacity-100"
-                aria-label={`Remove question: ${question.question}`}
-              >
-                <Trash2 className="w-5 h-5 text-red-400" />
-              </button>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {question.options.map((option, optIndex) => (
@@ -103,12 +109,15 @@ export default function QuestionList({
           </div>
         </div>
       ))}
-      <div className="flex justify-center">
+      { timeLeft === 0 &&
+        <div className="flex justify-center">
         {currentQuestionIndex !== questions.length - 1 ? (
           <button
+            ref={nextBtnRef}
             onClick={() => {
               revealAnswer();
               handleGameControl("next");
+              handleTimeLeft(10)
             }}
             className="flex items-center gap-2 bg-[#2368a0] text-[#ffffff] px-3 py-2 rounded-lg hover:bg-[#2368a0]/90 transition-all duration-200 shadow-md"
           >
@@ -117,6 +126,7 @@ export default function QuestionList({
           </button>
         ) : (
           !(gameStatus === "finished") && <button
+            ref={nextBtnRef}
             onClick={() => handleGameControl("end")}
             className="flex items-center gap-2 bg-miracle-red/80 text-[#ffffff] px-3 py-2 rounded-lg hover:bg-miracle-red/90 transition-all duration-200 shadow-md"
           >
@@ -125,12 +135,17 @@ export default function QuestionList({
           </button>
         )}
       </div>
+      }
+
 
     </div>
     :
     <div className="text-center py-8 rounded-xl h-full w-full flex flex-col justify-center items-center">
         <div className="text-miracle-darkGrey font-bold sm:text-base p-4 md:p-0">
-        Click Start Quiz to reveal the quiz questions.
+          <p>
+          <span className="text-miracle-black">File Uploaded : {fileName}</span> <br />
+          Click Start Quiz to reveal the quiz questions.
+          </p>
         </div>
       </div>
     }

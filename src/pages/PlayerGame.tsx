@@ -4,12 +4,25 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useGameStore } from "../store/gameStore";
 import { SocketContext } from "../context/SocketContext";
 import dsLogo from "../assets/Digital_Summit_24_Logo_Dark.svg";
+import {formatName} from './AdminGame';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
+import gameCup from '../assets/cup.png';
 
 interface Question {
   id: number;
   question: string;
   options: string[];
   correctAnswer: number;
+}
+
+interface Player {
+  rank : number,
+  score : number
 }
 
 export default function PlayerGame() {
@@ -23,6 +36,7 @@ export default function PlayerGame() {
   const playerName = useGameStore((state) => state.playerName);
   const [isLastQuestion, setIsLastQuestion] = useState(false);
   const [gameStarted,setGameStarted] = useState<boolean>(false);
+  const [playerStatus,setPlayerStatus] = useState<Player | null>({score : 0,rank : 0});
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -56,6 +70,7 @@ export default function PlayerGame() {
 
     socket.emit("verify-room",gameId,(response: { success: boolean, error?: string }) => {
       if(!response.success){
+        localStorage.clear();
         navigate("/")
       }
     })
@@ -83,7 +98,7 @@ export default function PlayerGame() {
       if(quizId === gameId){
         useGameStore.getState().setGameStatus("finished");
         localStorage.clear();
-        navigate("/");
+        // navigate("/");
       }
     });
 
@@ -122,6 +137,20 @@ export default function PlayerGame() {
     };
   }, [socket]);
 
+  useEffect(() => {
+    if(timeLeft === 0 && isLastQuestion){
+      console.log("status",gameId)
+      socket?.emit('status', { gameId, playerName: playerName }, (response: { success: boolean, player : Player }) => {
+        if (response.success) {
+          console.log(response)
+          setPlayerStatus(response.player)
+        }
+      });
+    }
+  },[timeLeft])
+
+  
+
   const handleAnswerSelect = (answerIndex: number) => {
     console.log(answerIndex, isAnswerLocked, gameStatus);
     if (isAnswerLocked || gameStatus !== "playing") return;
@@ -148,10 +177,16 @@ export default function PlayerGame() {
           <div className=" mb-6">
             <div className="flex justify-between">
               <div className="flex flex-col justify-center">
-                <h2 className="text-xl font-semibold text-miracle-darkBlue">
-                  {playerName.charAt(0).toLocaleUpperCase() +
-                    playerName.substring(1)}
-                </h2>
+              <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <h2 className="text-xl font-semibold text-miracle-darkBlue">{formatName(playerName)}</h2>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>{playerName}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
                 <h5 className=" text-miracle-darkGrey">Quiz Id: {gameId}</h5>
               </div>
               <img src={dsLogo} width={100} alt="" />
@@ -213,12 +248,15 @@ export default function PlayerGame() {
               </div>
             </>
           ) : (
-            <div className="text-center py-8">
+            <div className="text-center py-2">
               <h3 className="text-xl font-semibold text-miracle-lightGrey">
                 {gameStatus === "finished" || isLastQuestion ? (
-                  <h2>
-                     Well done! Your quiz is now complete. <br /> Thanks for joining us!
-                  </h2>
+                  <div className="flex flex-col justify-center">
+                    <img src={gameCup} width={150} className="mx-auto" alt="" />
+                    <p className="text-miracle-mediumBlue">Rank : {playerStatus?.rank}</p>
+                    <p className="text-miracle-mediumBlue">Score : {playerStatus?.score}</p>
+                     <p>Well done! Your quiz is completed. <br /> Thanks for joining us!</p>
+                  </div>
                 ) : (
                   "Waiting for the next question..."
                 )}

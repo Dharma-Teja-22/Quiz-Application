@@ -95,6 +95,29 @@ io.on("connection", (socket) => {
     callback({ success: true });
   });
 
+  socket.on("status",({gameId,playerName},callback) => {
+    // console.log("status called",gameId,quizzes)
+    if(quizzes.has(gameId)){
+      // console.log("status called")
+      const quiz = quizzes.get(gameId);
+      if(quiz.players.has(playerName)){
+        const playerArray = Array.from(quiz.players.values());
+
+        // Sort players based on their scores in descending order
+        const sortedPlayers = playerArray.sort((a, b) => b.score - a.score);
+        const playerIndex = sortedPlayers.findIndex((player,index) => player.name === playerName)
+        console.log(playerIndex)
+        callback({success:true,player:{score : sortedPlayers[playerIndex].score,rank : playerIndex+1}})
+      }
+      else{
+        console.log("player not found")
+      }
+    }
+    else{
+      console.log("quizId not fount")
+    }
+  })
+
   socket.on("game-action", ({ gameId, action }) => {
     console.log(gameId,action)
     const game = quizzes.get(gameId);
