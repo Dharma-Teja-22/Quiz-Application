@@ -25,6 +25,7 @@ export default function Layout() {
       <div className="row-span-11">
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/admin" element={<Home />} />
           {isAunthenticated ? (
             <>
               <Route path="/admin/:gameId" element={<AdminGame />} />
@@ -33,7 +34,6 @@ export default function Layout() {
           ) : (
             <Route path="/create" element={<LoginForm />} />
           )}
-
           <Route path="/play/:gameId" element={<PlayerGame />} />
           <Route path="/join" element={<JoinGame />} />
           <Route path="*" element={<NotFound />} />
