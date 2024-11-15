@@ -22,15 +22,15 @@ export default function Home() {
         </div>
         
         <div className="space-y-4">
-          {
-            !isAdmin ? <button
+          <button
             onClick={() => navigate('/join')}
             className="w-full flex rounded-lg items-center justify-center gap-3 bg-miracle-darkBlue text-white p-4 font-semibold hover:bg-miracle-darkBlue/70 transition-colors"
           >
             <Users className="w-5 h-5" />
             Join Quiz
-          </button> :
-          <button
+          </button>
+          {
+            isAdmin && <button
           onClick={() => navigate('/create')}
           className="w-full flex items-center rounded-lg justify-center gap-3 bg-miracle-lightBlue text-miracle-white p-4 font-semibold hover:bg-miracle-lightBlue/70 transition-colors"
         >
@@ -38,8 +38,6 @@ export default function Home() {
           Create New Quiz
         </button>
           }
-          
-          
           
         </div>
       </div>

@@ -202,20 +202,20 @@ export default function AdminGame() {
                   }
                   
                 </div>
-                <div className='overflow-hidden h-full'>
+                <div className='overflow-hidden '>
                 {students.length > 0 ? (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-2 h-[300px] md:h-full overflow-scroll no-scrollbar pb-5 md:pb-12">
+                  <div className="flex flex-wrap   gap-2 md:h-full overflow-scroll no-scrollbar pb-5 md:pb-12">
                     {students.map((player) => (
                       <div
                         key={player.name}
-                        className="bg-white rounded-lg py-2 px-1 transition-all duration-200 border border-gray-200 shadow-md max-h-[70px]"
+                        className="bg-white w-full md:w-[49%] rounded-lg py-2 px-1 transition-all duration-200 border border-gray-200 shadow-md max-h-[53px]"
                       >
                         <div className="flex items-center gap-3 justify-between">
                           <div className='flex items-center'>
-                            <div className="bg-miracle-lightBlue/40 p-2 rounded-full">
+                            <div className="rounded-full">
                               <img
-                                src={`https://api.dicebear.com/9.x/avataaars/svg?seed=${player.name}`}
-                                alt="avatar" width={20}/>
+                                src={`https://avatar.iran.liara.run/username?username=${player.name}`}
+                                alt="avatar" width={30}/>
                             </div>
                             <TooltipProvider>
                               <Tooltip>
