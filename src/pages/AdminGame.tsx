@@ -17,33 +17,33 @@ export const formatName = (name : string) => {
 export default function AdminGame() {
   const { gameId } = useParams();
   const socket = useContext(SocketContext);
-  const [students, setStudents] = useState<Player[]>([]);
-  // const [students, setStudents] = useState<Player[]>([
-  //   { name: "Rachel Adams", score: 86 },
-  //   { name: "Sam Wilson", score: 94 },
-  //   { name: "Tina Green", score: 81 },
-  //   { name: "Alice Johnson", score: 85 },
-  //   { name: "Bob Smith", score: 92 },
-  //   { name: "Charlie Brown", score: 78 },
-  //   { name: "David Williams", score: 88 },
-  //   { name: "Emma Davis", score: 91 },
-  //   { name: "Fiona Clark", score: 76 },
-  //   { name: "George Miller", score: 84 },
-  //   { name: "Hannah Moore", score: 95 },
-  //   { name: "Isaac Taylor", score: 80 },
-  //   { name: "Julia Anderson", score: 89 },
-  //   { name: "Kevin Thompson", score: 93 },
-  //   { name: "Lily Harris", score: 90 },
-  //   { name: "Mason Lee", score: 79 },
-  //   { name: "Nina Young", score: 83 },
-  //   { name: "Oscar Martin", score: 87 },
-  //   { name: "Paul Walker", score: 77 },
-  //   { name: "Quincy Scott", score: 82 },
-  //   { name: "Rachel Adams", score: 86 },
-  //   { name: "Sam Wilson", score: 94 },
-  //   { name: "Tina Green", score: 81 },
+  // const [students, setStudents] = useState<Player[]>([]);
+  const [students, setStudents] = useState<Player[]>([
+    { name: "Rachel Adams", score: 86 },
+    { name: "Sam Wilson", score: 94 },
+    { name: "Tina Green", score: 81 },
+    { name: "Alice Johnson", score: 85 },
+    { name: "Bob Smith", score: 92 },
+    { name: "Charlie Brown", score: 78 },
+    { name: "David Williams", score: 88 },
+    { name: "Emma Davis", score: 91 },
+    { name: "Fiona Clark", score: 76 },
+    { name: "George Miller", score: 84 },
+    { name: "Hannah Moore", score: 95 },
+    { name: "Isaac Taylor", score: 80 },
+    { name: "Julia Anderson", score: 89 },
+    { name: "Kevin Thompson", score: 93 },
+    { name: "Lily Harris", score: 90 },
+    { name: "Mason Lee", score: 79 },
+    { name: "Nina Young", score: 83 },
+    { name: "Oscar Martin", score: 87 },
+    { name: "Paul Walker", score: 77 },
+    { name: "Quincy Scott", score: 82 },
+    { name: "Rachel Adams", score: 86 },
+    { name: "Sam Wilson", score: 94 },
+    { name: "Tina Green", score: 81 },
     
-  // ]);
+  ]);
 
   const gameStatus = useGameStore((state) => state.gameStatus);
   const setGameStatus = useGameStore((state) => state.setGameStatus);
@@ -244,7 +244,7 @@ export default function AdminGame() {
                   
                 </div>
                 {students.length > 0 ? (
-                  <div className="flex flex-wrap overflow-scroll h-full no-scrollbar gap-2 max-h-[500px] md:h-full pb-5 md:pb-12">
+                  <div className="flex flex-wrap overflow-scroll md:h-[95%] h-[350px] pb-2 w-full no-scrollbar gap-2">
                     {students.map((player : Player) => (
                       <Student player={player} />
                     ))}
