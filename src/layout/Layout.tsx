@@ -10,6 +10,7 @@ import LoginForm from "../pages/LoginForm";
 import { useGameStore } from "@/store/gameStore";
 import {useEffect} from 'react'
 import NotFound from '../pages/NotFound'
+import ConfettiPage from '../pages/ConfettiPage'
 
 export default function Layout() {
   const isAunthenticated = useGameStore((state) => state.isAuthenticated);
@@ -36,6 +37,7 @@ export default function Layout() {
           )}
           <Route path="/play/:gameId" element={<PlayerGame />} />
           <Route path="/join" element={<JoinGame />} />
+          <Route path="/confetti" element={<ConfettiPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </div>

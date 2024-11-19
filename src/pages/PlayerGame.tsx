@@ -69,7 +69,9 @@ export default function PlayerGame() {
     if (!socket) return;
 
     socket.emit("verify-room",gameId,(response: { success: boolean, error?: string }) => {
+      console.log(response)
       if(!response.success){
+        console.log(response+" kl")
         localStorage.clear();
         navigate("/")
       }

@@ -1,16 +1,14 @@
 import { useContext, useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 // import { useSocket } from '../context/SocketContext';
-import { Play, Pause, SkipForward, Users, Timer, Ban, User } from 'lucide-react';
+import { Play, Pause, SkipForward, Users, Timer, Ban, User , MedalIcon } from 'lucide-react';
 import { Question, useGameStore,Player } from '../store/gameStore';
 import QuestionList from '../components/QuestionList';
 import { SocketContext } from '../context/SocketContext';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
+import Student from './Student'
+import ToppersModal from './ToppersModal'
+import Confetti from 'react-confetti'
+
 
 export const formatName = (name : string) => {
   return name.length > 10 ? name.substring(0, 10) + '...' : name;
@@ -20,12 +18,41 @@ export default function AdminGame() {
   const { gameId } = useParams();
   const socket = useContext(SocketContext);
   const [students, setStudents] = useState<Player[]>([]);
+  // const [students, setStudents] = useState<Player[]>([
+  //   { name: "Rachel Adams", score: 86 },
+  //   { name: "Sam Wilson", score: 94 },
+  //   { name: "Tina Green", score: 81 },
+  //   { name: "Alice Johnson", score: 85 },
+  //   { name: "Bob Smith", score: 92 },
+  //   { name: "Charlie Brown", score: 78 },
+  //   { name: "David Williams", score: 88 },
+  //   { name: "Emma Davis", score: 91 },
+  //   { name: "Fiona Clark", score: 76 },
+  //   { name: "George Miller", score: 84 },
+  //   { name: "Hannah Moore", score: 95 },
+  //   { name: "Isaac Taylor", score: 80 },
+  //   { name: "Julia Anderson", score: 89 },
+  //   { name: "Kevin Thompson", score: 93 },
+  //   { name: "Lily Harris", score: 90 },
+  //   { name: "Mason Lee", score: 79 },
+  //   { name: "Nina Young", score: 83 },
+  //   { name: "Oscar Martin", score: 87 },
+  //   { name: "Paul Walker", score: 77 },
+  //   { name: "Quincy Scott", score: 82 },
+  //   { name: "Rachel Adams", score: 86 },
+  //   { name: "Sam Wilson", score: 94 },
+  //   { name: "Tina Green", score: 81 },
+    
+  // ]);
+
   const gameStatus = useGameStore((state) => state.gameStatus);
   const setGameStatus = useGameStore((state) => state.setGameStatus);
   const questions = useGameStore((state) => state.questions);
   const [timeLeft, setTimeLeft] = useState<number>(10);
   const countRef = useRef<number>(0);
   const [isGameStarted,setIsGameStarted] = useState(false);
+  const [runConfetti,setRunConfetti] = useState(false);
+  const ToppersButtonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     const localGameStatus = localStorage.getItem("localGameStatus") as "waiting" | "playing" | "paused" | "finished" | null;
@@ -61,6 +88,17 @@ export default function AdminGame() {
   const handleTimeLeft= (time : number) => {
     setTimeLeft(time)
   }
+
+  const handleToppers = () => {
+    ToppersButtonRef.current?.click();
+    setRunConfetti(true);
+  }
+
+  useEffect(()  => {
+    if(timeLeft === 0 && countRef.current === questions.length - 1){
+      handleToppers();
+    }
+  },[timeLeft])
 
   useEffect(() => {
     if (!socket) return;
@@ -153,6 +191,8 @@ export default function AdminGame() {
                 <div>
                   <h1 className="text-2xl font-bold text-miracle-darkBlue">Quiz Control Panel</h1>
                   <p className="text-miracle-darkGrey">Quiz ID: {gameId}</p>
+                  
+                  <ToppersModal ToppersButtonRef={ToppersButtonRef} students={students} />
                 </div>
                 <div className="flex items-start h-full gap-2">
                   {questions.length > 0 && gameStatus !== "finished" && (
@@ -165,7 +205,7 @@ export default function AdminGame() {
                           <Pause className="w-5 h-5" />
                           Pause Quiz
                         </button>
-                      ) : isGameStarted ?(
+                      ) : isGameStarted ? (
                         <button
                           onClick={() => handleGameControl('start')}
                           className="flex items-center gap-2 bg-[#00aae7] text-[#ffffff] px-2 py-2 rounded-lg hover:bg-[#00aae7]/90 transition-all duration-200 shadow-md"
@@ -180,10 +220,11 @@ export default function AdminGame() {
                       <Play className="w-5 h-5" />
                       Start Quiz
                     </button>}
-                      
                     </>
                   )}
-                  {/* {gameFinished + ""} */}
+                    {
+                        gameStatus === 'finished' && <button className='flex items-center gap-2 bg-[#e79600] text-[#ffffff] px-2 py-2 rounded-lg hover:bg-[#e79600]/90 transition-all duration-200 shadow-md' onClick={handleToppers}> <MedalIcon /> Leader Board</button>
+                    }
                 </div>
               </div>
               <div className="rounded-lg md:row-span-7 row-span-4 overflow-hidden p-2 px-0">
@@ -202,50 +243,22 @@ export default function AdminGame() {
                   }
                   
                 </div>
-                <div className='overflow-hidden '>
                 {students.length > 0 ? (
-                  <div className="flex flex-wrap   gap-2 md:h-full overflow-scroll no-scrollbar pb-5 md:pb-12">
-                    {students.map((player) => (
-                      <div
-                        key={player.name}
-                        className="bg-white w-full md:w-[49%] rounded-lg py-2 px-1 transition-all duration-200 border border-gray-200 shadow-md max-h-[53px]"
-                      >
-                        <div className="flex items-center gap-3 justify-between">
-                          <div className='flex items-center'>
-                            <div className="rounded-full">
-                              <img
-                                src={`https://avatar.iran.liara.run/username?username=${player.name}`}
-                                alt="avatar" width={30}/>
-                            </div>
-                            <TooltipProvider>
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                <h3 className="font-medium ml-2 text-miracle-black">{formatName(player.name)}</h3>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                  <p>{player.name}</p>
-                                </TooltipContent>
-                              </Tooltip>
-                            </TooltipProvider>
-                            
-                          </div>
-                          <div className="flex justify-between items-center h-full">
-                            <div className="flex items-center">
-                            Score: {player.score}
-                              {/* <span className="text-miracle-black px-2 rounded-full text-sm font-medium"> */}
-                              
-                              {/* </span> */}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
+                  <div className="flex flex-wrap overflow-scroll h-full no-scrollbar gap-2 max-h-[500px] md:h-full pb-5 md:pb-12">
+                    {students.map((player : Player) => (
+                      <Student player={player} />
                     ))}
                   </div>
                 ) : <div className='flex justify-center md:h-[350px] text-miracle-darkGrey font-bold items-center'>Waiting for Students to join...</div> }
-                </div>
               </div>
             </div>
-
+            <Confetti
+                className='w-screen h-screen z-50'
+                colors={['#00aae7','#2368a0','#0d416b','#ef4048','#232527']}
+                numberOfPieces={2000}
+                recycle={false}
+                run={runConfetti}
+                />
             <div className='h-full max-h-[500px] md:max-h-full overflow-scroll no-scrollbar pb-2 border rounded-lg border-gray-200 bg-white'>
               <QuestionList currentQuestionIndex={countRef.current} handleGameControl={handleGameControl} timeLeft={timeLeft} handleTimeLeft={handleTimeLeft} isGameStarted={isGameStarted}/>
             </div>
