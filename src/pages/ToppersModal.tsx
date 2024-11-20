@@ -20,7 +20,7 @@ import { Medal } from 'lucide-react';
 export default function ToppersModal({ToppersButtonRef,students} : {ToppersButtonRef : React.RefObject<HTMLButtonElement>,students : Player[]}) {
   return (
     <Dialog >
-        <DialogTrigger ref={ToppersButtonRef}></DialogTrigger>
+        <DialogTrigger className="hidden" ref={ToppersButtonRef}></DialogTrigger>
         <DialogContent>
             <DialogHeader>
             <DialogTitle className="text-2xl">Congratulations Toppers</DialogTitle>

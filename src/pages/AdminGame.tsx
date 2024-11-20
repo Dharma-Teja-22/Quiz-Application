@@ -32,17 +32,7 @@ export default function AdminGame() {
     { name: "George Miller", score: 84 },
     { name: "Hannah Moore", score: 95 },
     { name: "Isaac Taylor", score: 80 },
-    { name: "Julia Anderson", score: 89 },
-    { name: "Kevin Thompson", score: 93 },
-    { name: "Lily Harris", score: 90 },
-    { name: "Mason Lee", score: 79 },
-    { name: "Nina Young", score: 83 },
-    { name: "Oscar Martin", score: 87 },
-    { name: "Paul Walker", score: 77 },
-    { name: "Quincy Scott", score: 82 },
-    { name: "Rachel Adams", score: 86 },
-    { name: "Sam Wilson", score: 94 },
-    { name: "Tina Green", score: 81 },
+
   ]);
 
   const gameStatus = useGameStore((state) => state.gameStatus);
@@ -187,9 +177,9 @@ export default function AdminGame() {
     <div className='h-full bg-[#EEF7FF]'>
           <div className="overflow-auto w-full h-full lg:grid mx-auto lg:grid-cols-2 lg:grid-rows-1 gap-3 p-2">
 
-            <div className="h-fit grid md:grid-rows-8 grid-rows-5 md:h-full bg-white mb-3 p-2 xl:p-5 col-span-1 rounded-lg border border-gray-200 md:mb-0">
-              <div className="flex flex-col row-span-1 md:flex-row justify-between items-start sm:items-center gap-4">
-                <div>
+            <div className="max-h-[500px] md:max-h-full grid grid-rows-8 md:h-full bg-white mb-3 p-2 xl:p-5 col-span-1 rounded-lg border border-gray-200 md:mb-0">
+              <div className="flex flex-col row-span-2 md:row-span-1 md:flex-row md:justify-between items-start gap-4">
+                <div className=''>
                   <h1 className="text-2xl font-bold text-miracle-darkBlue">Quiz Control Panel</h1>
                   <p className="text-miracle-darkGrey">Quiz ID: {gameId}</p>
                   
@@ -228,7 +218,7 @@ export default function AdminGame() {
                     }
                 </div>
               </div>
-              <div className="rounded-lg md:row-span-7 row-span-4 overflow-hidden p-2 px-0">
+              <div className="rounded-lg md:row-span-7 row-span-6 overflow-hidden p-2 px-0">
                 <div className="flex flex-row items-center justify-between gap-4 mb-2">
                   <div className='flex gap-2 items-center'>
                     <Users className="w-5 h-5 text-miracle-black" />
@@ -244,7 +234,7 @@ export default function AdminGame() {
                   }
                   
                 </div>
-                <div className='h-[20%] md:h-[95%] border border-black no-scrollbar overflow-scroll'>
+                <div className='h-[95%] no-scrollbar overflow-scroll'>
                 {students.length > 0 ? (
                   <div className="flex flex-wrap overflow-scroll md:h-fit pb-2 w-full no-scrollbar gap-2">
                     <AnimatePresence>
@@ -256,7 +246,7 @@ export default function AdminGame() {
                         initial={{ opacity: 0, y: 50 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -50 }}
-                        transition={{ duration: 0.5 }}
+                        transition={{ duration: 1 }}
                         className="bg-white w-full md:w-[49%] rounded-lg py-2 px-1 transition-all duration-200 border border-gray-200 shadow-md max-h-[53px]"
                       >
                         <div className="flex items-center gap-3 justify-between">
