@@ -5,13 +5,20 @@ import {
     TooltipTrigger,
   } from "@/components/ui/tooltip"
 
+import { motion} from 'framer-motion';
+
 import {Player} from '../store/gameStore'
 import {formatName} from './AdminGame'
 
 export default function StudentsList({player} : {player : Player}) {
   return (
-        <div
+        <motion.div
           key={player.name}
+          layout
+          initial={{ opacity: 0, y: 50 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -50 }}
+          transition={{ duration: 0.5 }}
           className="bg-white w-full md:w-[49%] rounded-lg py-2 px-1 transition-all duration-200 border border-gray-200 shadow-md max-h-[53px]"
         >
           <div className="flex items-center gap-3 justify-between">
@@ -42,6 +49,6 @@ export default function StudentsList({player} : {player : Player}) {
               </div>
             </div>
           </div>
-        </div>
+        </motion.div>
   )
 }

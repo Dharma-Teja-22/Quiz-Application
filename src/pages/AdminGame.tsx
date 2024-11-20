@@ -8,6 +8,13 @@ import { SocketContext } from '../context/SocketContext';
 import Student from './Student'
 import ToppersModal from './ToppersModal'
 import Confetti from 'react-confetti'
+import {AnimatePresence ,motion} from 'framer-motion'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 
 
 export const formatName = (name : string) => {
@@ -19,12 +26,6 @@ export default function AdminGame() {
   const socket = useContext(SocketContext);
   // const [students, setStudents] = useState<Player[]>([]);
   const [students, setStudents] = useState<Player[]>([
-    { name: "Rachel Adams", score: 86 },
-    { name: "Sam Wilson", score: 94 },
-    { name: "Tina Green", score: 81 },
-    { name: "Alice Johnson", score: 85 },
-    { name: "Bob Smith", score: 92 },
-    { name: "Charlie Brown", score: 78 },
     { name: "David Williams", score: 88 },
     { name: "Emma Davis", score: 91 },
     { name: "Fiona Clark", score: 76 },
@@ -42,7 +43,6 @@ export default function AdminGame() {
     { name: "Rachel Adams", score: 86 },
     { name: "Sam Wilson", score: 94 },
     { name: "Tina Green", score: 81 },
-    
   ]);
 
   const gameStatus = useGameStore((state) => state.gameStatus);
@@ -96,6 +96,7 @@ export default function AdminGame() {
 
   useEffect(()  => {
     if(timeLeft === 0 && countRef.current === questions.length - 1){
+      setGameStatus("finished")
       handleToppers();
     }
   },[timeLeft])
@@ -122,7 +123,7 @@ export default function AdminGame() {
       if(quizId === gameId){
       console.log("updated score")
       setStudents((current) => {
-        const newStudents = current.map(p => p.name === playerName ? { ...p, score: newScore } : p)
+        const newStudents = current.map(p => p.name === playerName ? { ...p, score: newScore,id : Date.now() } : p)
         .sort((a, b) => b.score - a.score);
         localStorage.setItem("localStudents",JSON.stringify(newStudents))
         return newStudents;
@@ -243,13 +244,56 @@ export default function AdminGame() {
                   }
                   
                 </div>
+                <div className='h-[20%] md:h-[95%] border border-black no-scrollbar overflow-scroll'>
                 {students.length > 0 ? (
-                  <div className="flex flex-wrap overflow-scroll md:h-[95%] h-[350px] pb-2 w-full no-scrollbar gap-2">
+                  <div className="flex flex-wrap overflow-scroll md:h-fit pb-2 w-full no-scrollbar gap-2">
+                    <AnimatePresence>
                     {students.map((player : Player) => (
-                      <Student player={player} />
+                      // <Student player={player} />
+                      <motion.div
+                        key={player.name}
+                        layout
+                        initial={{ opacity: 0, y: 50 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -50 }}
+                        transition={{ duration: 0.5 }}
+                        className="bg-white w-full md:w-[49%] rounded-lg py-2 px-1 transition-all duration-200 border border-gray-200 shadow-md max-h-[53px]"
+                      >
+                        <div className="flex items-center gap-3 justify-between">
+                          <div className='flex items-center'>
+                            <div className="rounded-full">
+                              <img
+                                src={`https://avatar.iran.liara.run/username?username=${player.name}`}
+                                alt="avatar" width={30}/>
+                            </div>
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                <h3 className="font-medium ml-2 text-miracle-black">{formatName(player.name)}</h3>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>{player.name}</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                            
+                          </div>
+                          <div className="flex justify-between items-center h-full">
+                            <div className="flex items-center">
+                            Score: {player.score}
+                              {/* <span className="text-miracle-black px-2 rounded-full text-sm font-medium"> */}
+                              
+                              {/* </span> */}
+                            </div>
+                          </div>
+                        </div>
+                      </motion.div>
                     ))}
+                    </AnimatePresence>
                   </div>
                 ) : <div className='flex justify-center md:h-[350px] text-miracle-darkGrey font-bold items-center'>Waiting for Students to join...</div> }
+                </div>
+                
               </div>
             </div>
             <Confetti
