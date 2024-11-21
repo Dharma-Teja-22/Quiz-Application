@@ -24,16 +24,16 @@ export const formatName = (name : string) => {
 export default function AdminGame() {
   const { gameId } = useParams();
   const socket = useContext(SocketContext);
-  // const [students, setStudents] = useState<Player[]>([]);
-  const [students, setStudents] = useState<Player[]>([
-    { name: "David Williams", score: 88 },
-    { name: "Emma Davis", score: 91 },
-    { name: "Fiona Clark", score: 76 },
-    { name: "George Miller", score: 84 },
-    { name: "Hannah Moore", score: 95 },
-    { name: "Isaac Taylor", score: 80 },
+  const [students, setStudents] = useState<Player[]>([]);
+  // const [students, setStudents] = useState<Player[]>([
+  //   { name: "David Williams", score: 88 },
+  //   { name: "Emma Davis", score: 91 },
+  //   { name: "Fiona Clark", score: 76 },
+  //   { name: "George Miller", score: 84 },
+  //   { name: "Hannah Moore", score: 95 },
+  //   { name: "Isaac Taylor", score: 80 },
 
-  ]);
+  // ]);
 
   const gameStatus = useGameStore((state) => state.gameStatus);
   const setGameStatus = useGameStore((state) => state.setGameStatus);
