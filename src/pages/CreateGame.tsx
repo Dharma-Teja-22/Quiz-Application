@@ -25,6 +25,7 @@ export default function CreateGame() {
     socket && socket.emit('create', { gameId }, (response: { success: boolean, error?: string }) => {
       if (response.success) {
         useGameStore.getState().setGameId(gameId);
+        localStorage.setItem("gameId",gameId)
         setIsAdmin(true);
         navigate(`/admin/${gameId}`);
       } else {

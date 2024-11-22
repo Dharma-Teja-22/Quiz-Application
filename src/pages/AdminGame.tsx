@@ -1,4 +1,4 @@
-import { useContext, useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 // import { useSocket } from '../context/SocketContext';
 import { Play, Pause, SkipForward, Users, Timer, Ban, User , MedalIcon } from 'lucide-react';
@@ -8,13 +8,11 @@ import { SocketContext } from '../context/SocketContext';
 import Student from './Student'
 import ToppersModal from './ToppersModal'
 import Confetti from 'react-confetti'
-import {AnimatePresence ,motion} from 'framer-motion'
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
+
+import TimerUI from '@/components/TimerUI';
+import StudentList from '@/components/StudentList';
+import QuizAdminDashboard from './TestStudents';
+import { useNavigate } from "react-router-dom";
 
 
 export const formatName = (name : string) => {
@@ -22,18 +20,21 @@ export const formatName = (name : string) => {
 }
 
 export default function AdminGame() {
+  const navigate = useNavigate();
   const { gameId } = useParams();
   const socket = useContext(SocketContext);
-  const [students, setStudents] = useState<Player[]>([]);
-  // const [students, setStudents] = useState<Player[]>([
-  //   { name: "David Williams", score: 88 },
-  //   { name: "Emma Davis", score: 91 },
-  //   { name: "Fiona Clark", score: 76 },
-  //   { name: "George Miller", score: 84 },
-  //   { name: "Hannah Moore", score: 95 },
-  //   { name: "Isaac Taylor", score: 80 },
-
-  // ]);
+  // const [students, setStudents] = useState<Player[]>([]);
+  const [students, setStudents] = useState<Player[]>([
+    { name: "David Williams", score: 88 },
+    { name: "Emma Davis", score: 91 },
+    { name: "Fiona Clark", score: 76 },
+    { name: "George Miller", score: 84 },
+    { name: "Hannah Moore", score: 85 },
+    { name: "Isaac Taylor", score: 90 },
+    { name: "George Millerh", score: 84 },
+    { name: "Hannah Mooreh", score: 85 },
+    { name: "Isaac Taylorh", score: 90 },
+  ]);
 
   const gameStatus = useGameStore((state) => state.gameStatus);
   const setGameStatus = useGameStore((state) => state.setGameStatus);
@@ -113,8 +114,7 @@ export default function AdminGame() {
       if(quizId === gameId){
       console.log("updated score")
       setStudents((current) => {
-        const newStudents = current.map(p => p.name === playerName ? { ...p, score: newScore,id : Date.now() } : p)
-        .sort((a, b) => b.score - a.score);
+        const newStudents = current.map(p => p.name === playerName ? { ...p, score: newScore,id : p.name } : p)
         localStorage.setItem("localStudents",JSON.stringify(newStudents))
         return newStudents;
       }
@@ -137,6 +137,9 @@ export default function AdminGame() {
       socket.off('score-update');
     };
   }, [socket, gameId, questions]);
+
+  // const sortedStudents = useMemo(() => students.sort((a, b) => b.score - a.score),[students])
+  const sortedStudents = [...students].sort((a, b) => b.score - a.score)
 
 
   const handleGameControl = (action: 'start' | 'pause' | 'next' | 'end') => {
@@ -183,7 +186,7 @@ export default function AdminGame() {
                   <h1 className="text-2xl font-bold text-miracle-darkBlue">Quiz Control Panel</h1>
                   <p className="text-miracle-darkGrey">Quiz ID: {gameId}</p>
                   
-                  <ToppersModal ToppersButtonRef={ToppersButtonRef} students={students} />
+                  <ToppersModal ToppersButtonRef={ToppersButtonRef} students={sortedStudents} />
                 </div>
                 <div className="flex items-start h-full gap-2">
                   {questions.length > 0 && gameStatus !== "finished" && (
@@ -227,60 +230,14 @@ export default function AdminGame() {
                     </h2>
                   </div>
                   {
-                    isGameStarted && gameStatus !== "finished" && <div className="flex items-center gap-2 bg-miracle-mediumBlue px-4 py-2 rounded-full">
-                    <Timer className="w-5 h-5 text-miracle-white" />
-                    <span className="text-miracle-white font-medium">{timeLeft}s</span>
-                  </div>
+                    isGameStarted && gameStatus !== "finished" && <TimerUI timeLeft={timeLeft} />
                   }
                   
                 </div>
                 <div className='h-[95%] no-scrollbar overflow-scroll'>
                 {students.length > 0 ? (
-                  <div className="flex flex-wrap overflow-scroll md:h-fit pb-2 w-full no-scrollbar gap-2">
-                    <AnimatePresence>
-                    {students.map((player : Player) => (
-                      // <Student player={player} />
-                      <motion.div
-                        key={player.name}
-                        layout
-                        initial={{ opacity: 0, y: 50 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -50 }}
-                        transition={{ duration: 1 }}
-                        className="bg-white w-full md:w-[49%] rounded-lg py-2 px-1 transition-all duration-200 border border-gray-200 shadow-md max-h-[53px]"
-                      >
-                        <div className="flex items-center gap-3 justify-between">
-                          <div className='flex items-center'>
-                            <div className="rounded-full">
-                              <img
-                                src={`https://avatar.iran.liara.run/username?username=${player.name}`}
-                                alt="avatar" width={30}/>
-                            </div>
-                            <TooltipProvider>
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                <h3 className="font-medium ml-2 text-miracle-black">{formatName(player.name)}</h3>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                  <p>{player.name}</p>
-                                </TooltipContent>
-                              </Tooltip>
-                            </TooltipProvider>
-                            
-                          </div>
-                          <div className="flex justify-between items-center h-full">
-                            <div className="flex items-center">
-                            Score: {player.score}
-                              {/* <span className="text-miracle-black px-2 rounded-full text-sm font-medium"> */}
-                              
-                              {/* </span> */}
-                            </div>
-                          </div>
-                        </div>
-                      </motion.div>
-                    ))}
-                    </AnimatePresence>
-                  </div>
+                  <StudentList students={sortedStudents} />
+                  // <QuizAdminDashboard students={sortedStudents} />
                 ) : <div className='flex justify-center md:h-[350px] text-miracle-darkGrey font-bold items-center'>Waiting for Students to join...</div> }
                 </div>
                 
@@ -289,7 +246,7 @@ export default function AdminGame() {
             <Confetti
                 className='w-screen h-screen z-50'
                 colors={['#00aae7','#2368a0','#0d416b','#ef4048','#232527']}
-                numberOfPieces={2000}
+                numberOfPieces={5000}
                 recycle={false}
                 run={runConfetti}
                 />

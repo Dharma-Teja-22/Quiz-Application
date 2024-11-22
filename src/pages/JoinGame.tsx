@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 // import { useSocket } from '../context/SocketContext';
 import { useGameStore } from '../store/gameStore';
@@ -15,6 +15,13 @@ export default function JoinGame() {
   const [error, setError] = useState('');
   const setPlayerName = useGameStore((state) => state.setPlayerName);
   
+  useEffect(() => {
+    const currentPlayerName = localStorage.getItem("currentPlayerName");
+    const currentGameId = localStorage.getItem("gameId");
+    if(currentPlayerName){
+      navigate(`/play/${currentGameId}`);
+    }
+  },[])
 
   const handleJoin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,7 +32,9 @@ export default function JoinGame() {
 
     socket && socket.emit('join-game', { gameId, playerName: name }, (response: { success: boolean, error?: string }) => {
       if (response.success) {
+        localStorage.clear();
         localStorage.setItem("currentPlayerName",name);
+        localStorage.setItem("gameId",gameId);
         setPlayerName(name);
         navigate(`/play/${gameId}`);
       } else {
@@ -65,7 +74,7 @@ export default function JoinGame() {
               type="text"
               id="name"
               value={name}
-              onChange={(e) => setName(e.target.value.trim())}
+              onChange={(e) => setName(e.target.value)}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg  focus:border-transparent"
               placeholder="Enter your name"
             />

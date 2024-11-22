@@ -196,7 +196,7 @@ export default function PlayerGame() {
             <hr></hr>
             {
               timeLeft > 0 && <div className="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
-                      <div className={`bg-miracle-lightBlue h-2.5 rounded-full`} style={{width:(timeLeft * 10)+"%"}} ></div>
+                      <div className={`bg-miracle-lightBlue h-2.5 rounded-full transition-all duration-1000 ease-linear`} style={{width:(timeLeft * 10)+"%"}} ></div>
                     </div>
             }
           

@@ -189,7 +189,7 @@ function startQuestion(gameId, type) {
   if (!game) return;
   const question = game.questions[game.currentQuestion];
   const isFinalQuestion = game.currentQuestion === game.questions.length-1;
-  io.emit("question", question, game.timeLeft, type, isFinalQuestion,gameId);
+  io.emit("question", question, game.timerVal, type, isFinalQuestion,gameId);
 
   let timeLeft = game.timerVal;
   if (game.timer) clearInterval(game.timer);

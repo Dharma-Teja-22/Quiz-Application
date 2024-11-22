@@ -7,7 +7,7 @@ import { useContext } from 'react';
 
 
 export default function Header() {
-  const gameId = useGameStore((state) => state.gameId);
+  const gameId = localStorage.getItem("gameId");
   const navigate = useNavigate();
   const socket = useContext(SocketContext);
   const isAunthenticated = useGameStore((state) => state.isAuthenticated);

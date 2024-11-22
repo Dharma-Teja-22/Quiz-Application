@@ -39,7 +39,7 @@ export default function Layout() {
           <Route path="/play/:gameId" element={<PlayerGame />} />
           <Route path="/join" element={<JoinGame />} />
           <Route path="/confetti" element={<ConfettiPage />} />
-          <Route path="/animate" element={<QuizAdminDashboard />} />
+          {/* <Route path="/animate" element={<QuizAdminDashboard />} /> */}
           <Route path="*" element={<NotFound />} />
         </Routes>
       </div>
