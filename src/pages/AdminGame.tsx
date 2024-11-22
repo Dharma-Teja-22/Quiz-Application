@@ -23,18 +23,18 @@ export default function AdminGame() {
   const navigate = useNavigate();
   const { gameId } = useParams();
   const socket = useContext(SocketContext);
-  // const [students, setStudents] = useState<Player[]>([]);
-  const [students, setStudents] = useState<Player[]>([
-    { name: "David Williams", score: 88 },
-    { name: "Emma Davis", score: 91 },
-    { name: "Fiona Clark", score: 76 },
-    { name: "George Miller", score: 84 },
-    { name: "Hannah Moore", score: 85 },
-    { name: "Isaac Taylor", score: 90 },
-    { name: "George Millerh", score: 84 },
-    { name: "Hannah Mooreh", score: 85 },
-    { name: "Isaac Taylorh", score: 90 },
-  ]);
+  const [students, setStudents] = useState<Player[]>([]);
+  // const [students, setStudents] = useState<Player[]>([
+  //   { name: "David Williams", score: 88 },
+  //   { name: "Emma Davis", score: 91 },
+  //   { name: "Fiona Clark", score: 76 },
+  //   { name: "George Miller", score: 84 },
+  //   { name: "Hannah Moore", score: 85 },
+  //   { name: "Isaac Taylor", score: 90 },
+  //   { name: "George Millerh", score: 84 },
+  //   { name: "Hannah Mooreh", score: 85 },
+  //   { name: "Isaac Taylorh", score: 90 },
+  // ]);
 
   const gameStatus = useGameStore((state) => state.gameStatus);
   const setGameStatus = useGameStore((state) => state.setGameStatus);
