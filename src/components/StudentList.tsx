@@ -2,6 +2,8 @@
 import { motion, AnimatePresence } from 'framer-motion'
 import { Card, CardContent } from '@/components/ui/card'
 import { Player } from '@/store/gameStore'
+import { Skeleton } from "@/components/ui/skeleton"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
 
 export default function StudentList({students}:{students : Player []}) {
@@ -28,10 +30,17 @@ export default function StudentList({students}:{students : Player []}) {
                   <div className="flex justify-between items-center">
                   
                     <span className="font-semibold flex items-center">
-                      <img
+                     <span className=''>
+                     {/* <Skeleton className="w-[30px] h-[30px] mr-2 rounded-full absolute -z-10 top-3" />
+                     <img
                         src={`https://avatar.iran.liara.run/username?username=${student.name}`}
                         alt="avatar" width={30}
-                        className='mr-2'/>
+                        className='mr-2'/> */}
+                        <Avatar className='h-8 w-8 mr-2'>
+                            <AvatarImage src={`https://avatar.iran.liara.run/username?username=${student.name}`} />
+                            <AvatarFallback></AvatarFallback>
+                        </Avatar>
+                     </span>
                       {student.name}
                     </span>
                     <motion.span

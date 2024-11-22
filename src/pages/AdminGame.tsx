@@ -185,8 +185,10 @@ export default function AdminGame() {
                 <div className=''>
                   <h1 className="text-2xl font-bold text-miracle-darkBlue">Quiz Control Panel</h1>
                   <p className="text-miracle-darkGrey">Quiz ID: {gameId}</p>
+                  {
                   
-                  <ToppersModal ToppersButtonRef={ToppersButtonRef} students={sortedStudents} />
+                  gameStatus === 'finished' && <ToppersModal ToppersButtonRef={ToppersButtonRef} students={sortedStudents} />
+                  }
                 </div>
                 <div className="flex items-start h-full gap-2">
                   {questions.length > 0 && gameStatus !== "finished" && (
