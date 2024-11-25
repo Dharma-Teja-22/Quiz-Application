@@ -100,7 +100,7 @@ export default function QuestionList({
                     </span>
                     <span
                     >
-                      {option}
+                      {option.content}
                     </span>
                   </div>
                 </div>

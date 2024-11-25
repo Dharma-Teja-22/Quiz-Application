@@ -1,9 +1,15 @@
 import { create } from 'zustand';
 
+export interface Option {
+  id : number;
+  content : string,
+  count : number
+}
+
 export interface Question {
   id: number;
   question: string;
-  options: string[];
+  options: Option[];
   correctAnswer: number;
   showAnswer : boolean
 }

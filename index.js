@@ -67,6 +67,42 @@ io.on("connection", (socket) => {
     }
   })
 
+  socket.on("question-status",({gameId, currentQuestion},callback) => {
+    const game = quizzes.get(gameId);
+    console.log(game)
+    if (!game) {
+      callback({ success: false, error: "Quiz not found" });
+      return;
+    }
+    const totalPlayers = game.players.size;
+    
+    
+    const question = game.questions[game.currentQuestion];
+    console.log(totalPlayers,question,question.id,currentQuestion.id)
+    if(question.id === currentQuestion.id){
+      callback({success: true,question : question, totalPlayers : totalPlayers})
+      return;
+    }
+  })
+
+  socket.on("getAnswerIndex",({gameId, currentQuestion},callback) => {
+    console.log("reveal")
+    const game = quizzes.get(gameId);
+    if (!game) {
+      callback({ success: false, error: "Quiz not found" });
+      return;
+    }
+
+    const question = game.questions[game.currentQuestion];
+    console.log(question);
+    if(question.id === currentQuestion.id){
+      callback({success: true, answerIndex : question.correctAnswer })
+      return;
+    }
+      callback({success:false})
+    return;
+  })
+
   socket.on("join-game", ({ gameId, playerName }, callback) => {
     const game = quizzes.get(gameId);
 
@@ -165,6 +201,7 @@ io.on("connection", (socket) => {
     console.log(question.id, questionId);
     if (question.id !== questionId) return;
     console.log(answer, question);
+    game.questions[game.currentQuestion]["options"] = question.options.map(option => option.id === answer ? {...option,count : option.count+1} : option);
     if (answer === question.correctAnswer) {
       player.score += (timeLeft * 10);
       io.emit("score-update", {
@@ -199,6 +236,7 @@ function startQuestion(gameId, type) {
     game.timerVal = timeLeft;
     io.emit("timer", timeLeft,gameId);
     if (timeLeft <= 0) {
+
       clearInterval(game.timer);
     }
   }, 1000);
@@ -243,15 +281,10 @@ app.post("/api/upload-excel", upload.single("file"), (req, res) => {
       return {
         id: item.Id,
         question: item.Question,
-        options: [item.Option1, item.Option2, item.Option3, item.Option4],
+        options: [{id : 0,content : item.Option1,count : 0}, {id : 1,content : item.Option2,count : 0}, {id : 2,content : item.Option3,count : 0}, {id : 3,content : item.Option4,count : 0}],
         correctAnswer: item.Answer - 1, // Adjust answer to zero-based index
       };
     });
-    // Use gameId as the key in the JSON response
-    // quizData = {
-    //   ...quizData,
-    //   [req.body.quizId]: allDataNew,
-    // };
 
     res.json({
       questions: allDataNew,

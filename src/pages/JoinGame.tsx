@@ -15,13 +15,13 @@ export default function JoinGame() {
   const [error, setError] = useState('');
   const setPlayerName = useGameStore((state) => state.setPlayerName);
   
-  useEffect(() => {
-    const currentPlayerName = localStorage.getItem("currentPlayerName");
-    const currentGameId = localStorage.getItem("gameId");
-    if(currentPlayerName){
-      navigate(`/play/${currentGameId}`);
-    }
-  },[])
+  // useEffect(() => {
+  //   const currentPlayerName = localStorage.getItem("currentPlayerName");
+  //   const currentGameId = localStorage.getItem("gameId");
+  //   if(currentPlayerName){
+  //     navigate(`/play/${currentGameId}`);
+  //   }
+  // },[])
 
   const handleJoin = (e: React.FormEvent) => {
     e.preventDefault();

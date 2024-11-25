@@ -1,23 +1,18 @@
 import { useContext, useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 // import { useSocket } from '../context/SocketContext';
-import { Option, useGameStore } from "../store/gameStore";
+import { Option,useGameStore } from "../store/gameStore";
 import { SocketContext } from "../context/SocketContext";
 import dsLogo from "../assets/Digital_Summit_24_Logo_Dark.svg";
-import {formatName} from './AdminGame';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
 import gameCup from '../assets/cup.png';
+import { useToast } from "@/hooks/use-toast";
+import ToppersModal from './ToppersModal'
+
 
 interface Question {
   id: number;
   question: string;
   options: Option[];
-  correctAnswer: number;
 }
 
 interface Player {
@@ -25,11 +20,16 @@ interface Player {
   score : number
 }
 
-export default function PlayerGame() {
+interface Player2 {
+  name : string,
+  score : number
+}
+
+export default function Controller() {
   const { gameId } = useParams();
   const socket = useContext(SocketContext);
   const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null);
-  const [timeLeft, setTimeLeft] = useState<number>(0);
+  const [timeLeft, setTimeLeft] = useState<number>(10);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [isAnswerLocked, setIsAnswerLocked] = useState(false);
   const gameStatus = useGameStore((state) => state.gameStatus);
@@ -38,19 +38,34 @@ export default function PlayerGame() {
   const [gameStarted,setGameStarted] = useState<boolean>(false);
   const [playerStatus,setPlayerStatus] = useState<Player | null>({score : 0,rank : 0});
   const navigate = useNavigate();
+  const { toast } = useToast();
+  const [answerIndex,setAnswerIndex] = useState<number | null>(null);
+  const [totalPlayers,setTotalPlayers] = useState<number | null>(null)
+  const ToppersButtonRef = useRef<HTMLButtonElement>(null);
+  const [students, setStudents] = useState<Player2[]>([
+    { name: "Emma Davis", score: 91 },
+    { name: "Fiona Clark", score: 76 },
+    { name: "George Miller", score: 84 },
+    { name: "Hannah Moore", score: 85 },
+    { name: "Isaac Taylor", score: 90 },
+    { name: "George Millerh", score: 84 },
+    { name: "Hannah Mooreh", score: 85 },
+    { name: "Isaac Taylorh", score: 90 },
+    { name: "George Millerh", score: 84 },
+    { name: "Hannah Mooreh", score: 85 },
+    { name: "Isaac Taylorh", score: 90 },
+    { name: "George Millerh", score: 84 },
+    { name: "Hannah Mooreh", score: 85 },
+    { name: "Isaac Taylorh", score: 90 },
+  ]);
 
   useEffect(() => {
     const currentLocalQuestion = localStorage.getItem("currentLocalQuestion");
-    const currentPlayerName = localStorage.getItem("currentPlayerName");
     const localGameStatus = localStorage.getItem("gameStatus") as "waiting" | "playing" | "paused" | "finished" | null;
     const isGameStarted =localStorage.getItem("gameStarted");
     const localTimerVaue = localStorage.getItem("localTimerVaue");
-    const localIsAnswerlocked = localStorage.getItem("localIsAnswerlocked");
-    const localSelectedAnswer = localStorage.getItem("localSelectedAnswer");
     const localIsLastQuestion = localStorage.getItem("localIsLastQuestion");
-    if(currentPlayerName){
-      useGameStore.getState().setPlayerName(currentPlayerName);
-    }
+
      if (currentLocalQuestion && localTimerVaue && isGameStarted && localGameStatus && ["waiting", "playing", "paused", "finished"].includes(gameStatus)) {
       console.log("entered");
       setCurrentQuestion(JSON.parse(currentLocalQuestion));
@@ -58,27 +73,28 @@ export default function PlayerGame() {
       setGameStarted(JSON.parse(isGameStarted));
       setTimeLeft(JSON.parse(localTimerVaue))
     }
-    if(localSelectedAnswer && localIsAnswerlocked && localIsLastQuestion){
-      setIsAnswerLocked(JSON.parse(localIsAnswerlocked));
+    if(localIsLastQuestion){
       setIsLastQuestion(JSON.parse(localIsLastQuestion));
-      setSelectedAnswer(JSON.parse(localSelectedAnswer))
     }
   }, []);
 
   useEffect(() => {
     if (!socket) return;
 
-    socket.emit("verify-room",gameId,(response: { success: boolean, error?: string }) => {
-      console.log(response)
-      if(!response.success){
-        console.log(response+" kl")
-        localStorage.clear();
-        navigate("/")
-      }
-    })
+    socket.on('player-joined', (playerData,quizId) => {
+        console.log(playerData,quizId)
+        if(quizId === gameId){
+            toast({
+                title: playerData.name + " joined Quiz",
+                duration : 1000
+            }) 
+        }
+      });
 
-    socket.on("question", (question : Question, timeLeft, type, isFinalQuestion,quizId) => {
+    socket.on("question", (question, timeLeft, type, isFinalQuestion,quizId) => {
       if(quizId === gameId){
+        setTotalPlayers(null);
+        setAnswerIndex(null);
         if (type === "next") {
           localStorage.setItem("localSelectedAnswer","null");
           localStorage.setItem("localIsAnswerlocked","false");
@@ -99,7 +115,7 @@ export default function PlayerGame() {
     socket.on("end", (quizId) => {
       if(quizId === gameId){
         useGameStore.getState().setGameStatus("finished");
-        localStorage.clear();
+        // localStorage.clear();
         // navigate("/");
       }
     });
@@ -139,38 +155,35 @@ export default function PlayerGame() {
     };
   }, [socket]);
 
-  useEffect(() => {
-    if(timeLeft === 0 && isLastQuestion){
-      console.log("status",gameId)
-      socket?.emit('status', { gameId, playerName: playerName }, (response: { success: boolean, player : Player }) => {
+  const revealAnswer = () => {
+    console.log("reveal")
+    socket?.emit('getAnswerIndex', { gameId, currentQuestion }, (response: { success: boolean,answerIndex : number}) => {
         if (response.success) {
           console.log(response)
-          setPlayerStatus(response.player)
+          setAnswerIndex(response.answerIndex)
+          
+        }
+      });
+  }
+  const sortedStudents = [...students].sort((a, b) => b.score - a.score)
+
+  useEffect(() => {
+    if(timeLeft === 0){
+      console.log("status",gameId)
+      socket?.emit('question-status', { gameId, currentQuestion }, (response: { success: boolean, question : Question, totalPlayers : number  }) => {
+        if (response.success) {
+          console.log(response)
+          setCurrentQuestion(response.question);
+          setTotalPlayers(response.totalPlayers)
+        }
+        else{
+            console.log("error")
         }
       });
     }
   },[timeLeft])
 
-  
 
-  const handleAnswerSelect = (answerIndex: number) => {
-    console.log(answerIndex, isAnswerLocked, gameStatus);
-    if (isAnswerLocked || gameStatus !== "playing") return;
-
-    localStorage.setItem("localSelectedAnswer",answerIndex+"");
-    localStorage.setItem("localIsAnswerlocked","true");
-
-    setSelectedAnswer(answerIndex);
-    setIsAnswerLocked(true);
-    socket &&
-      socket.emit("submit-answer", {
-        gameId,
-        questionId: currentQuestion?.id,
-        answer: answerIndex,
-        playerName: playerName,
-        timeLeft: timeLeft,
-      });
-  };
 
   return (
     <div className="min-h-full bg-[#EEF7FF] flex items-center justify-center relative">
@@ -179,17 +192,7 @@ export default function PlayerGame() {
           <div className=" mb-6">
             <div className="flex justify-between">
               <div className="flex flex-col justify-center">
-              <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <h2 className="text-xl font-semibold text-miracle-darkBlue">{formatName(playerName)}</h2>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>{playerName}</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-                <h5 className=" text-miracle-darkGrey">Quiz Id: {gameId}</h5>
+                <h5 className=" text-miracle-black font-bold text-xl">Quiz ID <br />{gameId}</h5>
               </div>
               <img src={dsLogo} width={100} alt="" />
             </div>
@@ -200,7 +203,9 @@ export default function PlayerGame() {
                     </div>
             }
           </div>
-
+          {
+           gameStatus === 'finished' && <ToppersModal ToppersButtonRef={ToppersButtonRef} students={sortedStudents} />
+          }
           {gameStarted ? gameStatus === "paused" ? (
             <div className="text-center py-8">
               <h3 className="text-xl font-semibold text-miracle-darkGrey">
@@ -210,7 +215,7 @@ export default function PlayerGame() {
                 Waiting for the host to resume...
               </p>
             </div>
-          ) : currentQuestion && timeLeft !== 0 ? (
+          ) : currentQuestion ? (
             <>
               <h3 className="text-xl font-semibold text-miracle-black mb-6">
                 {currentQuestion.question}
@@ -219,21 +224,20 @@ export default function PlayerGame() {
                 {currentQuestion.options.map((option, index) => (
                   <button
                     key={index}
-                    onClick={() => handleAnswerSelect(index)}
-                    className={`p-4 text-left transition-all rounded-lg ${
-                      selectedAnswer === index
+                    className={`p-4 relative text-left transition-all rounded-lg ${
+                      answerIndex === index
                         ? "bg-miracle-lightBlue text-white"
                         : "ring-2 ring-[#00aae7]/50 text-black bg-[#00aae7]/5"
-                    } ${
-                      isAnswerLocked || timeLeft === 0
-                        ? "cursor-not-allowed"
-                        : "cursor-pointer"
                     }`}
-                    disabled={isAnswerLocked || timeLeft === 0}
                   >
-                    {option.content}
+                    <span>{option.content}</span><span className="absolute right-1">{totalPlayers && (Math.round(option.count/totalPlayers)*100) + "%"}</span>
                   </button>
                 ))}
+              </div>
+              <div>
+                <button onClick={revealAnswer} className="p-2 mt-5 bg-miracle-darkBlue text-white rounded-lg">
+                    Reveal Answer
+                </button>
               </div>
             </>
           ) : (

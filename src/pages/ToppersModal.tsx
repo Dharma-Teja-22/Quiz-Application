@@ -25,7 +25,7 @@ export default function ToppersModal({ToppersButtonRef,students} : {ToppersButto
             <DialogHeader>
             <DialogTitle className="text-2xl">Congratulations Toppers</DialogTitle>
             <DialogDescription>
-            <div className="flex justify-evenly items-end mb-4 border-b-2 border-gray-300">
+            {/* <div className="flex justify-evenly items-end mb-4 border-b-2 border-gray-300"> */}
           {/* Display top 3 students with height proportional to their scores */}
           {/* {students.slice(0, 3).map((player: Player, index: number) => (
             <div
@@ -52,7 +52,7 @@ export default function ToppersModal({ToppersButtonRef,students} : {ToppersButto
               )}
             </div>
           ))} */}
-          <div className="flex items-center flex-col">
+          {/* <div className="flex items-center flex-col">
                   <img
                     src={`https://avatar.iran.liara.run/username?username=${students[1].name}`}
                     alt="avatar"
@@ -118,11 +118,11 @@ export default function ToppersModal({ToppersButtonRef,students} : {ToppersButto
                   </p>
                   <p className="text-center text-miracle-black justify-center items-center font-semibold text-xl flex border bg-gray-100 h-[40px] w-[100px] rounded-t-lg">{students[2].score}</p>
           </div>
-            </div>
+            </div> */}
 
         {/* Display remaining students normally */}
         <div className="h-[300px] overflow-scroll no-scrollbar">
-        {students.slice(3, 10).map((player: Player) => (
+        {students.slice(0, 10).map((player: Player) => (
           <div
             key={player.name}
             className="bg-white w-full mt-2 text-xl rounded-lg py-2 px-1 transition-all duration-200 border border-gray-200 shadow-md max-h-[53px]"
