@@ -13,7 +13,7 @@ export default function StudentList({students}:{students : Player []}) {
   return (
 
       <div className="flex w-full">
-        <Card className="mb-6 overflow-scroll h-[500px] border-0 no-scrollbar">
+        <Card className=" overflow-scroll h-[500px] border-0 no-scrollbar w-full shadow-none">
           <CardContent className='p-0 '>
             <div className='flex w-full items-start flex-wrap gap-2'>
             <AnimatePresence>

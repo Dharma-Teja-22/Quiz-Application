@@ -25,12 +25,18 @@ export default function AdminGame() {
   const socket = useContext(SocketContext);
   const [students, setStudents] = useState<Player[]>([]);
   // const [students, setStudents] = useState<Player[]>([
-  //   { name: "David Williams", score: 88 },
+  //   { name: "Davs", score: 88 },
   //   { name: "Emma Davis", score: 91 },
   //   { name: "Fiona Clark", score: 76 },
   //   { name: "George Miller", score: 84 },
   //   { name: "Hannah Moore", score: 85 },
   //   { name: "Isaac Taylor", score: 90 },
+  //   { name: "George Millerh", score: 84 },
+  //   { name: "Hannah Mooreh", score: 85 },
+  //   { name: "Isaac Taylorh", score: 90 },
+  //   { name: "George Millerh", score: 84 },
+  //   { name: "Hannah Mooreh", score: 85 },
+  //   { name: "Isaac Taylorh", score: 90 },
   //   { name: "George Millerh", score: 84 },
   //   { name: "Hannah Mooreh", score: 85 },
   //   { name: "Isaac Taylorh", score: 90 },
