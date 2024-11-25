@@ -41,7 +41,7 @@ io.on("connection", (socket) => {
       currentQuestion: 0,
       status: "waiting",
       timer: null,
-      timerVal: 10,
+      timerVal: 2,
     });
     socket.join(gameId);
     console.log(`Game created: ${gameId}`);
@@ -175,7 +175,7 @@ io.on("connection", (socket) => {
         game.currentQuestion++;
         if (game.currentQuestion < game.questions.length) {
           io.emit("game-started",gameId);
-          game.timerVal = 10;
+          game.timerVal = 2;
           startQuestion(gameId, "next");
         } else {
           endGame(gameId);

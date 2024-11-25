@@ -125,8 +125,7 @@ export default function QuestionList({
             Next Question
           </button>
         ) : (
-          !(gameStatus === "finished") && <button
-            ref={nextBtnRef}
+          (gameStatus === "finished") && <button
             onClick={() => handleGameControl("end")}
             className="flex items-center gap-2 bg-miracle-red/80 text-[#ffffff] px-3 py-2 rounded-lg hover:bg-miracle-red/90 transition-all duration-200 shadow-md"
           >

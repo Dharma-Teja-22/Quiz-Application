@@ -7,6 +7,7 @@ import dsLogo from "../assets/Digital_Summit_24_Logo_Dark.svg";
 import gameCup from '../assets/cup.png';
 import { useToast } from "@/hooks/use-toast";
 import ToppersModal from './ToppersModal'
+import Confetti from 'react-confetti'
 
 
 interface Question {
@@ -58,6 +59,15 @@ export default function Controller() {
     { name: "Hannah Mooreh", score: 85 },
     { name: "Isaac Taylorh", score: 90 },
   ]);
+  const [runConfetti,setRunConfetti] = useState(false);
+
+
+  const handleToppers = () => {
+    ToppersButtonRef.current?.click();
+    console.log(ToppersButtonRef.current)
+    setRunConfetti(true);
+    console.log("clicked")
+  }
 
   useEffect(() => {
     const currentLocalQuestion = localStorage.getItem("currentLocalQuestion");
@@ -113,8 +123,11 @@ export default function Controller() {
     });
 
     socket.on("end", (quizId) => {
+    console.log(gameId)
       if(quizId === gameId){
+        console.log("ended")
         useGameStore.getState().setGameStatus("finished");
+        handleToppers();
         // localStorage.clear();
         // navigate("/");
       }
@@ -183,11 +196,24 @@ export default function Controller() {
     }
   },[timeLeft])
 
-
+  // useEffect(()  => {
+  //   console.log(countRef.current,questions.length-1)
+  //   if(timeLeft === 0 && countRef.current === questions.length - 1){
+  //     setGameStatus("finished")
+  //     handleToppers();
+  //   }
+  // },[timeLeft])
 
   return (
     <div className="min-h-full bg-[#EEF7FF] flex items-center justify-center relative">
-      <div className="max-w-2xl w-[90%] z-10 ">
+                  <Confetti
+                className='w-screen h-screen z-50'
+                colors={['#00aae7','#2368a0','#0d416b','#ef4048','#232527']}
+                numberOfPieces={5000}
+                recycle={false}
+                run={runConfetti}
+                />
+      <div className="max-w-2xl w-[90%] ">
         <div className="bg-miracle-white rounded-lg border border-gray-200 shadow-xl p-6 mb-4">
           <div className=" mb-6">
             <div className="flex justify-between">
@@ -203,9 +229,8 @@ export default function Controller() {
                     </div>
             }
           </div>
-          {
-           gameStatus === 'finished' && <ToppersModal ToppersButtonRef={ToppersButtonRef} students={sortedStudents} />
-          }
+         <ToppersModal ToppersButtonRef={ToppersButtonRef} students={sortedStudents} />
+
           {gameStarted ? gameStatus === "paused" ? (
             <div className="text-center py-8">
               <h3 className="text-xl font-semibold text-miracle-darkGrey">
@@ -235,9 +260,14 @@ export default function Controller() {
                 ))}
               </div>
               <div>
-                <button onClick={revealAnswer} className="p-2 mt-5 bg-miracle-darkBlue text-white rounded-lg">
+                {
+                  gameStatus === "finished" ?  <button onClick={handleToppers} className="p-2 mt-5 bg-miracle-darkBlue text-white rounded-lg">
+                  Leader Board
+              </button> : <button onClick={revealAnswer} className="p-2 mt-5 bg-miracle-darkBlue text-white rounded-lg">
                     Reveal Answer
                 </button>
+                }
+                
               </div>
             </>
           ) : (

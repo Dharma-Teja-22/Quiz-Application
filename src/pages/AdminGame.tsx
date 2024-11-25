@@ -88,10 +88,13 @@ export default function AdminGame() {
 
   const handleToppers = () => {
     ToppersButtonRef.current?.click();
+    console.log(ToppersButtonRef.current)
     setRunConfetti(true);
+    console.log("clicked")
   }
 
   useEffect(()  => {
+    console.log(countRef.current,questions.length-1)
     if(timeLeft === 0 && countRef.current === questions.length - 1){
       setGameStatus("finished")
       handleToppers();
@@ -191,10 +194,10 @@ export default function AdminGame() {
                 <div className=''>
                   <h1 className="text-2xl font-bold text-miracle-darkBlue">Quiz Control Panel</h1>
                   <p className="text-miracle-darkGrey">Quiz ID: {gameId}</p>
-                  {
                   
-                  gameStatus === 'finished' && <ToppersModal ToppersButtonRef={ToppersButtonRef} students={sortedStudents} />
-                  }
+                  
+                 <ToppersModal ToppersButtonRef={ToppersButtonRef} students={sortedStudents} />
+                  
                 </div>
                 <div className="flex items-start h-full gap-2">
                   {questions.length > 0 && gameStatus !== "finished" && (
