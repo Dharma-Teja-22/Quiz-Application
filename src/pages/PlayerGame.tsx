@@ -210,7 +210,7 @@ export default function PlayerGame() {
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <h2 className="text-xl font-semibold text-miracle-darkBlue">
+                      <h2 className="text-4xl font-bold text-miracle-darkBlue">
                         {formatName(playerName)}
                       </h2>
                     </TooltipTrigger>
@@ -219,7 +219,7 @@ export default function PlayerGame() {
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
-                <h5 className=" text-miracle-darkGrey">Quiz Id: {gameId}</h5>
+                <h5 className=" text-miracle-darkGrey font-semibold mt-1">Quiz Id: {gameId}</h5>
               </div>
               <img src={dsLogo} width={100} alt="" />
             </div>

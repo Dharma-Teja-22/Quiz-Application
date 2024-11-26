@@ -76,6 +76,7 @@ export default function AdminGame() {
     }
     if(localStudents){
       useGameStore.getState().setStudents(JSON.parse(localStudents));
+      console.log(useGameStore.getState().students)
     }
     if(localcurrentQuestion){
       countRef.current = JSON.parse(localcurrentQuestion);
@@ -200,7 +201,7 @@ export default function AdminGame() {
             <div className="max-h-[500px] md:max-h-full grid grid-rows-8 md:h-full bg-white mb-3 p-2 xl:p-5 col-span-1 rounded-lg border border-gray-200 md:mb-0">
               <div className="flex flex-col row-span-2 md:row-span-1 md:flex-row md:justify-between items-start gap-4">
                 <div className=''>
-                  <h1 className="text-2xl font-bold text-miracle-darkBlue">Quiz Control Panel</h1>
+                  <h1 className="text-2xl font-bold text-miracle-darkBlue">Quiz Control Panel { useGameStore.getState().gameStatus}</h1>
                   <p className="text-miracle-darkGrey">Quiz ID: {gameId}</p>
                   
                   
@@ -236,7 +237,7 @@ export default function AdminGame() {
                     </>
                   )}
                     {
-                        gameStatus === 'finished' && <button className='flex items-center gap-2 bg-[#e79600] text-[#ffffff] px-2 py-2 rounded-lg hover:bg-[#e79600]/90 transition-all duration-200 shadow-md' onClick={handleToppers}> <MedalIcon /> Leader Board</button>
+                        gameStatus === 'finished' && <button className='flex items-center gap-2 bg-[#e79600] text-[#ffffff] px-2 py-2 rounded-lg hover:bg-[#e79600]/90 transition-all duration-200 shadow-md' onClick={handleToppers}> <MedalIcon /> Leaderboard</button>
                     }
                 </div>
               </div>
