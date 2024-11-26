@@ -50,23 +50,23 @@ export default function Controller() {
   const [answerIndex, setAnswerIndex] = useState<number | null>(null);
   const [totalPlayers, setTotalPlayers] = useState<number | null>(null)
   const ToppersButtonRef = useRef<HTMLButtonElement>(null);
-  // const [students,setStudents] = useState<Player[] | null>(null)
-  const [students, setStudents] = useState<Player[]>([
-    { name: "Emma Davis", score: 91 },
-    { name: "Fiona Clark", score: 76 },
-    { name: "George Miller", score: 84 },
-    { name: "Hannah Moore", score: 85 },
-    { name: "Isaac Taylor", score: 90 },
-    { name: "George Millerh", score: 84 },
-    { name: "Hannah Mooreh", score: 85 },
-    { name: "Isaac Taylorh", score: 90 },
-    { name: "George Millerh", score: 84 },
-    { name: "Hannah Mooreh", score: 85 },
-    { name: "Isaac Taylorh", score: 90 },
-    { name: "George Millerh", score: 84 },
-    { name: "Hannah Mooreh", score: 85 },
-    { name: "Isaac Taylorh", score: 90 },
-  ]);
+  const [students,setStudents] = useState<Player[] | null>(null)
+  // const [students, setStudents] = useState<Player[]>([
+  //   { name: "Emma Davis", score: 91 },
+  //   { name: "Fiona Clark", score: 76 },
+  //   { name: "George Miller", score: 84 },
+  //   { name: "Hannah Moore", score: 85 },
+  //   { name: "Isaac Taylor", score: 90 },
+  //   { name: "George Millerh", score: 84 },
+  //   { name: "Hannah Mooreh", score: 85 },
+  //   { name: "Isaac Taylorh", score: 90 },
+  //   { name: "George Millerh", score: 84 },
+  //   { name: "Hannah Mooreh", score: 85 },
+  //   { name: "Isaac Taylorh", score: 90 },
+  //   { name: "George Millerh", score: 84 },
+  //   { name: "Hannah Mooreh", score: 85 },
+  //   { name: "Isaac Taylorh", score: 90 },
+  // ]);
   const [runConfetti, setRunConfetti] = useState(false);
 
   useEffect(() => {
@@ -97,9 +97,9 @@ export default function Controller() {
       setGameStarted(JSON.parse(isGameStarted));
       setTimeLeft(JSON.parse(localTimerVaue))
     }
-    // if(localStudents){
-    //   setStudents(JSON.parse(localStudents));
-    // }
+    if(localStudents){
+      setStudents(JSON.parse(localStudents));
+    }
     if (localIsLastQuestion) {
       setIsLastQuestion(JSON.parse(localIsLastQuestion));
     }
