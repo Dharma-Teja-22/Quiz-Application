@@ -93,13 +93,13 @@ export default function AdminGame() {
     console.log("clicked")
   }
 
-  useEffect(()  => {
-    console.log(countRef.current,questions.length-1)
-    if(timeLeft === 0 && countRef.current === questions.length - 1){
-      setGameStatus("finished")
-      handleToppers();
-    }
-  },[timeLeft])
+  // useEffect(()  => {
+  //   console.log(countRef.current,questions.length-1)
+  //   if(timeLeft === 0 && countRef.current === questions.length - 1){
+  //     setGameStatus("finished")
+  //     handleToppers();
+  //   }
+  // },[timeLeft])
 
   useEffect(() => {
     if (!socket) return;
@@ -186,6 +186,8 @@ export default function AdminGame() {
         break;
       case 'end':
         socket.emit('game-action', { gameId, action: 'end' });
+        handleToppers();
+        localStorage.setItem("localGameStatus","finished")
         useGameStore.getState().setGameStatus("finished");
         break;
     }
@@ -202,7 +204,7 @@ export default function AdminGame() {
                   <p className="text-miracle-darkGrey">Quiz ID: {gameId}</p>
                   
                   
-                 <ToppersModal ToppersButtonRef={ToppersButtonRef} students={sortedStudents} />
+                 <ToppersModal ToppersButtonRef={ToppersButtonRef} />
                   
                 </div>
                 <div className="flex items-start h-full gap-2">
@@ -263,7 +265,7 @@ export default function AdminGame() {
             <Confetti
                 className='w-screen h-screen z-50'
                 colors={['#00aae7','#2368a0','#0d416b','#ef4048','#232527']}
-                numberOfPieces={5000}
+                numberOfPieces={2000}
                 recycle={false}
                 run={runConfetti}
                 />

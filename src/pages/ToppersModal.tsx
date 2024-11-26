@@ -6,7 +6,7 @@ import {
     DialogTitle,
     DialogTrigger,
   } from "@/components/ui/dialog"
-import {Player} from '../store/gameStore'
+import {Player, useGameStore} from '../store/gameStore'
 import {
     Tooltip,
     TooltipContent,
@@ -17,13 +17,16 @@ import {formatName} from './AdminGame'
 import { Medal } from 'lucide-react';
 
   
-export default function ToppersModal({ToppersButtonRef,students} : {ToppersButtonRef : React.RefObject<HTMLButtonElement>,students : Player[]}) {
+export default function ToppersModal({ToppersButtonRef} : {ToppersButtonRef : React.RefObject<HTMLButtonElement>}) {
+  const students = useGameStore(state => state.students);
+  const sortedStudents = [...students].sort((a, b) => b.score - a.score)
+
   return (
     <Dialog >
         <DialogTrigger className="hidden" ref={ToppersButtonRef}></DialogTrigger>
         <DialogContent>
             <DialogHeader>
-            <DialogTitle className="text-2xl">Congratulations Toppers</DialogTitle>
+            <DialogTitle className="text-2xl">Congratulations</DialogTitle>
             <DialogDescription>
             {/* <div className="flex justify-evenly items-end mb-4 border-b-2 border-gray-300"> */}
           {/* Display top 3 students with height proportional to their scores */}
@@ -121,45 +124,56 @@ export default function ToppersModal({ToppersButtonRef,students} : {ToppersButto
             </div> */}
 
         {/* Display remaining students normally */}
-        <div className="h-[300px] overflow-scroll no-scrollbar">
-        {students.slice(0, 10).map((player: Player) => (
-          <div
-            key={player.name}
-            className="bg-white w-full mt-2 text-xl rounded-lg py-2 px-1 transition-all duration-200 border border-gray-200 shadow-md max-h-[53px]"
-          >
-            <div className="flex items-center gap-3 justify-between">
-              <div className="flex items-center">
-                <div className="rounded-full">
-                  <img
-                    src={`https://avatar.iran.liara.run/username?username=${player.name}`}
-                    alt="avatar"
-                    width={30}
-                  />
-                </div>
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <h3 className="font-medium ml-2 text-miracle-black flex items-center">
-                        {formatName(player.name)}
-                      </h3>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>{player.name}</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              </div>
-              <div className="flex justify-between items-center h-full">
+        {
+          sortedStudents && 
+          (
+            sortedStudents.length <= 0 ? 
+          <div className="flex justify-center items-center h-[300px] text-xl font-bold text-gray-400">
+            No participants
+          </div>
+          :
+          <div className="h-[300px] overflow-scroll no-scrollbar">
+          {sortedStudents.slice(0, 10).map((player: Player) => (
+            <div
+              key={player.name}
+              className="bg-white w-full mt-2 text-xl rounded-lg py-2 px-1 transition-all duration-200 border border-gray-200 shadow-md max-h-[53px]"
+            >
+              <div className="flex items-center gap-3 justify-between">
                 <div className="flex items-center">
-                  <span className="text-lg font-bold text-miracle-black">
-                    {player.score}
-                  </span>
+                  <div className="rounded-full">
+                    <img
+                      src={`https://avatar.iran.liara.run/username?username=${player.name}`}
+                      alt="avatar"
+                      width={30}
+                    />
+                  </div>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <h3 className="font-medium ml-2 text-miracle-black flex items-center">
+                          {formatName(player.name)}
+                        </h3>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>{player.name}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </div>
+                <div className="flex justify-between items-center h-full">
+                  <div className="flex items-center">
+                    <span className="text-lg font-bold text-miracle-black">
+                      {player.score}
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
+          ))}
           </div>
-        ))}
-        </div>
+          )
+        }
+
 
             </DialogDescription>
             </DialogHeader>

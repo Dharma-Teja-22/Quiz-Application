@@ -16,12 +16,12 @@ interface Question {
   options: Option[];
 }
 
-interface Player {
+interface Player2 {
   rank : number,
   score : number
 }
 
-interface Player2 {
+interface Player {
   name : string,
   score : number
 }
@@ -37,13 +37,13 @@ export default function Controller() {
   const playerName = useGameStore((state) => state.playerName);
   const [isLastQuestion, setIsLastQuestion] = useState(false);
   const [gameStarted,setGameStarted] = useState<boolean>(false);
-  const [playerStatus,setPlayerStatus] = useState<Player | null>({score : 0,rank : 0});
+  const [playerStatus,setPlayerStatus] = useState<Player2 | null>({score : 0,rank : 0});
   const navigate = useNavigate();
   const { toast } = useToast();
   const [answerIndex,setAnswerIndex] = useState<number | null>(null);
   const [totalPlayers,setTotalPlayers] = useState<number | null>(null)
   const ToppersButtonRef = useRef<HTMLButtonElement>(null);
-  const students = useGameStore(state => state.students);
+  const students = useState<Player[] | null>(null)
   // const [students, setStudents] = useState<Player2[]>([
   //   { name: "Emma Davis", score: 91 },
   //   { name: "Fiona Clark", score: 76 },
@@ -62,6 +62,9 @@ export default function Controller() {
   // ]);
   const [runConfetti,setRunConfetti] = useState(false);
 
+  useEffect(() => {
+    console.log(students)
+  },[students])
 
   const handleToppers = () => {
     ToppersButtonRef.current?.click();
@@ -70,16 +73,13 @@ export default function Controller() {
     console.log("clicked")
   }
 
-    const formatNumber = (number : number) => {
-      return number.toFixed(2)
-    }
-
   useEffect(() => {
     const currentLocalQuestion = localStorage.getItem("currentLocalQuestion");
     const localGameStatus = localStorage.getItem("gameStatus") as "waiting" | "playing" | "paused" | "finished" | null;
     const isGameStarted =localStorage.getItem("gameStarted");
     const localTimerVaue = localStorage.getItem("localTimerVaue");
     const localIsLastQuestion = localStorage.getItem("localIsLastQuestion");
+    
 
      if (currentLocalQuestion && localTimerVaue && isGameStarted && localGameStatus && ["waiting", "playing", "paused", "finished"].includes(gameStatus)) {
       console.log("entered");
@@ -131,6 +131,10 @@ export default function Controller() {
     console.log(gameId)
       if(quizId === gameId){
         console.log("ended")
+        const localStudents = localStorage.getItem("localStudents");
+        if(localStudents){
+          useGameStore.getState().setStudents(JSON.parse(localStudents));
+        }
         useGameStore.getState().setGameStatus("finished");
         handleToppers();
         // localStorage.clear();
@@ -158,6 +162,14 @@ export default function Controller() {
       }
     });
 
+    socket.on("getAnswerIndex",(quizId,answerIndex) => {
+      console.log("answer get")
+      if(quizId === gameId){
+        console.log("getted ",answerIndex,quizId,gameId)
+        setAnswerIndex(answerIndex)
+      }
+    })
+
     socket.on("game-resumed", (quizId) => {
       if(quizId === gameId){
         useGameStore.getState().setGameStatus("playing");
@@ -173,17 +185,16 @@ export default function Controller() {
     };
   }, [socket]);
 
-  const revealAnswer = () => {
-    console.log("reveal")
-    socket?.emit('getAnswerIndex', { gameId, currentQuestion }, (response: { success: boolean,answerIndex : number}) => {
-        if (response.success) {
-          console.log(response)
-          setAnswerIndex(response.answerIndex)
+  // const revealAnswer = () => {
+  //   console.log("reveal")
+  //   socket?.emit('getAnswerIndex', { gameId, currentQuestion }, (response: { success: boolean,answerIndex : number}) => {
+  //       if (response.success) {
+  //         console.log(response)
+  //         setAnswerIndex(response.answerIndex)
           
-        }
-      });
-  }
-  const sortedStudents = [...students].sort((a, b) => b.score - a.score)
+  //       }
+  //     });
+  // }
 
   useEffect(() => {
     if(timeLeft === 0 && currentQuestion){
@@ -223,7 +234,7 @@ export default function Controller() {
           <div className=" mb-6">
             <div className="flex justify-between">
               <div className="flex flex-col justify-center">
-                <h5 className=" text-miracle-black font-bold text-xl">Quiz ID <br />{gameId}</h5>
+                <h5 className=" text-miracle-black font-bold text-xl"> Quiz ID <br />{gameId}</h5>
               </div>
               <img src={dsLogo} width={100} alt="" />
             </div>
@@ -234,7 +245,8 @@ export default function Controller() {
                     </div>
             }
           </div>
-         <ToppersModal ToppersButtonRef={ToppersButtonRef} students={sortedStudents} />
+
+          <ToppersModal ToppersButtonRef={ToppersButtonRef} />
 
           {gameStarted ? gameStatus === "paused" ? (
             <div className="text-center py-8">
@@ -254,24 +266,29 @@ export default function Controller() {
                 {currentQuestion.options.map((option, index) => (
                   <button
                     key={index}
-                    className={`p-4 relative text-left transition-all rounded-lg ring-2 ${
+                    className={`p-6 relative text-left transition-all rounded-lg ring-2 ${
                       answerIndex === index
                         ? " ring-green-400 bg-green-50"
                         : "ring-[#00aae7]/50 text-black bg-[#00aae7]/5"
                     }`}
                   >
-                      <div style={{width:(totalPlayers !== null && totalPlayers !== 0) ?((option.count/totalPlayers)*100) + "%" : 0} } className={`absolute -z-10 rounded-lg transition-all duration-1000 ease-in-out ${answerIndex === index ? "bg-green-200" : "bg-miracle-lightBlue/30"} w-0 h-full top-0 left-0`}></div>
-                    <span>{option.content}</span><span className="absolute right-1">{totalPlayers !== null && totalPlayers !== 0 && (option.count/totalPlayers*100).toString().substring(0,2) + "%"}</span>
+                      <div style={{width:(totalPlayers !== null && totalPlayers !== 0) ? ((option.count / totalPlayers) * 100).toFixed(2) + "%" : "0%"} } className={`absolute  rounded-lg transition-all duration-1000 ease-in-out ${answerIndex === index ? "bg-green-300" : "bg-miracle-lightBlue/30"} w-0 h-full top-0 left-0`}></div>
+                      <div className="absolute top-0 left-0 w-full h-full flex justify-between items-center">
+                        <div className="ml-2">
+                        {option.content}
+                        </div>
+                        <div className="mr-2">
+                        {totalPlayers !== null && totalPlayers !== 0 && Number(((option.count / totalPlayers) * 100).toFixed(2)) + "%"}
+                        </div>
+                      </div>
                   </button>
                 ))}
               </div>
               <div>
                 {
-                  timeLeft === 0 && (gameStatus === "finished" ?  <button onClick={handleToppers} className="p-2 mt-5 bg-miracle-darkBlue text-white rounded-lg">
+                  timeLeft === 0 && gameStatus === "finished" && <button onClick={handleToppers} className="p-2 mt-5 bg-miracle-darkBlue text-white rounded-lg">
                   Leader Board
-              </button> : <button onClick={revealAnswer} className="p-2 mt-5 bg-miracle-darkBlue text-white rounded-lg">
-                    Reveal Answer
-                </button>)
+              </button>
                 }
                 
               </div>

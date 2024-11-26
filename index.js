@@ -85,22 +85,16 @@ io.on("connection", (socket) => {
     }
   })
 
-  socket.on("getAnswerIndex",({gameId, currentQuestion},callback) => {
+  socket.on("getAnswerIndex",({gameId, currentQuestion}) => {
     console.log("reveal")
     const game = quizzes.get(gameId);
-    if (!game) {
-      callback({ success: false, error: "Quiz not found" });
-      return;
-    }
 
     const question = game.questions[game.currentQuestion];
-    console.log(question);
+    console.log(question,currentQuestion);
     if(question.id === currentQuestion.id){
-      callback({success: true, answerIndex : question.correctAnswer })
+      io.emit("getAnswerIndex",gameId,question.correctAnswer)
       return;
     }
-      callback({success:false})
-    return;
   })
 
   socket.on("join-game", ({ gameId, playerName }, callback) => {
