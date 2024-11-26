@@ -23,9 +23,9 @@ export default function AdminGame() {
   const navigate = useNavigate();
   const { gameId } = useParams();
   const socket = useContext(SocketContext);
-  // const [students, setStudents] = useState<Player[]>([]);
-  const [students, setStudents] = useState<Player[]>([
-    { name: "QQ", score: 0 },
+  const students = useGameStore(state => state.students);
+  // const [students, setStudents] = useState<Player[]>([
+  //   { name: "QQ", score: 0 },
     // { name: "Emma Davis", score: 91 },
     // { name: "Fiona Clark", score: 76 },
     // { name: "George Miller", score: 84 },
@@ -40,7 +40,7 @@ export default function AdminGame() {
     // { name: "George Millerh", score: 84 },
     // { name: "Hannah Mooreh", score: 85 },
     // { name: "Isaac Taylorh", score: 90 },
-  ]);
+  // ]);
 
   const gameStatus = useGameStore((state) => state.gameStatus);
   const setGameStatus = useGameStore((state) => state.setGameStatus);
@@ -75,7 +75,7 @@ export default function AdminGame() {
       useGameStore.getState().setQuestions(JSON.parse(localQuestions));
     }
     if(localStudents){
-      setStudents(JSON.parse(localStudents));
+      useGameStore.getState().setStudents(JSON.parse(localStudents));
     }
     if(localcurrentQuestion){
       countRef.current = JSON.parse(localcurrentQuestion);
@@ -107,27 +107,33 @@ export default function AdminGame() {
     socket.on('player-joined', (playerData,quizId) => {
       console.log(playerData,quizId)
       if(quizId === gameId){
-        setStudents((current) => {
-          const newStudents = [...current, playerData];
-          localStorage.setItem("localStudents",JSON.stringify(newStudents))
-          return newStudents;
-      });
+      //   setStudents((current) => {
+      //     const newStudents = [...current, playerData];
+      //     localStorage.setItem("localStudents",JSON.stringify(newStudents))
+      //     return newStudents;
+      // });
+      const newStudents = [...students, playerData];
+      localStorage.setItem("localStudents",JSON.stringify(newStudents))
+      useGameStore.getState().setStudents(newStudents);
       }
     });
 
-    socket.on('player-left', (playerId) => {
-      setStudents((current) => current.filter(p => p.name !== playerId));
-    });
+    // socket.on('player-left', (playerId) => {
+    //   setStudents((current) => current.filter(p => p.name !== playerId));
+    // });
 
     socket.on('score-update', ({ playerName, newScore },quizId) => {
       if(quizId === gameId){
       console.log("updated score")
-      setStudents((current) => {
-        const newStudents = current.map(p => p.name === playerName ? { ...p, score: newScore,id : p.name } : p)
-        localStorage.setItem("localStudents",JSON.stringify(newStudents))
-        return newStudents;
-      }
-      );
+      const newStudents = students.map(p => p.name === playerName ? { ...p, score: newScore,id : p.name } : p)
+      localStorage.setItem("localStudents",JSON.stringify(newStudents))
+      useGameStore.getState().setStudents(newStudents);
+      // setStudents((current) => {
+      //   const newStudents = current.map(p => p.name === playerName ? { ...p, score: newScore,id : p.name } : p)
+      //   localStorage.setItem("localStudents",JSON.stringify(newStudents))
+      //   return newStudents;
+      // }
+      // );
       
     }
     });
@@ -145,7 +151,7 @@ export default function AdminGame() {
       socket.off('player-left');
       socket.off('score-update');
     };
-  }, [socket, gameId, questions]);
+  }, [socket, gameId, questions,students]);
 
   // const sortedStudents = useMemo(() => students.sort((a, b) => b.score - a.score),[students])
   const sortedStudents = [...students].sort((a, b) => b.score - a.score)

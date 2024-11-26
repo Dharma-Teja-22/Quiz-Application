@@ -30,7 +30,7 @@ export default function Controller() {
   const { gameId } = useParams();
   const socket = useContext(SocketContext);
   const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null);
-  const [timeLeft, setTimeLeft] = useState<number>(10);
+  const [timeLeft, setTimeLeft] = useState<number>(0);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [isAnswerLocked, setIsAnswerLocked] = useState(false);
   const gameStatus = useGameStore((state) => state.gameStatus);
@@ -43,22 +43,23 @@ export default function Controller() {
   const [answerIndex,setAnswerIndex] = useState<number | null>(null);
   const [totalPlayers,setTotalPlayers] = useState<number | null>(null)
   const ToppersButtonRef = useRef<HTMLButtonElement>(null);
-  const [students, setStudents] = useState<Player2[]>([
-    { name: "Emma Davis", score: 91 },
-    { name: "Fiona Clark", score: 76 },
-    { name: "George Miller", score: 84 },
-    { name: "Hannah Moore", score: 85 },
-    { name: "Isaac Taylor", score: 90 },
-    { name: "George Millerh", score: 84 },
-    { name: "Hannah Mooreh", score: 85 },
-    { name: "Isaac Taylorh", score: 90 },
-    { name: "George Millerh", score: 84 },
-    { name: "Hannah Mooreh", score: 85 },
-    { name: "Isaac Taylorh", score: 90 },
-    { name: "George Millerh", score: 84 },
-    { name: "Hannah Mooreh", score: 85 },
-    { name: "Isaac Taylorh", score: 90 },
-  ]);
+  const students = useGameStore(state => state.students);
+  // const [students, setStudents] = useState<Player2[]>([
+  //   { name: "Emma Davis", score: 91 },
+  //   { name: "Fiona Clark", score: 76 },
+  //   { name: "George Miller", score: 84 },
+  //   { name: "Hannah Moore", score: 85 },
+  //   { name: "Isaac Taylor", score: 90 },
+  //   { name: "George Millerh", score: 84 },
+  //   { name: "Hannah Mooreh", score: 85 },
+  //   { name: "Isaac Taylorh", score: 90 },
+  //   { name: "George Millerh", score: 84 },
+  //   { name: "Hannah Mooreh", score: 85 },
+  //   { name: "Isaac Taylorh", score: 90 },
+  //   { name: "George Millerh", score: 84 },
+  //   { name: "Hannah Mooreh", score: 85 },
+  //   { name: "Isaac Taylorh", score: 90 },
+  // ]);
   const [runConfetti,setRunConfetti] = useState(false);
 
 
@@ -68,6 +69,10 @@ export default function Controller() {
     setRunConfetti(true);
     console.log("clicked")
   }
+
+    const formatNumber = (number : number) => {
+      return number.toFixed(2)
+    }
 
   useEffect(() => {
     const currentLocalQuestion = localStorage.getItem("currentLocalQuestion");
@@ -181,7 +186,7 @@ export default function Controller() {
   const sortedStudents = [...students].sort((a, b) => b.score - a.score)
 
   useEffect(() => {
-    if(timeLeft === 0){
+    if(timeLeft === 0 && currentQuestion){
       console.log("status",gameId)
       socket?.emit('question-status', { gameId, currentQuestion }, (response: { success: boolean, question : Question, totalPlayers : number  }) => {
         if (response.success) {
@@ -205,13 +210,13 @@ export default function Controller() {
   // },[timeLeft])
 
   return (
-    <div className="min-h-full bg-[#EEF7FF] flex items-center justify-center relative">
-                  <Confetti
-                className='w-screen h-screen z-50'
-                colors={['#00aae7','#2368a0','#0d416b','#ef4048','#232527']}
-                numberOfPieces={5000}
-                recycle={false}
-                run={runConfetti}
+    <div className="h-full bg-[#EEF7FF] flex items-center justify-center">
+                <Confetti
+                  className='w-screen h-screen z-50'
+                  colors={['#00aae7','#2368a0','#0d416b','#ef4048','#232527']}
+                  numberOfPieces={5000}
+                  recycle={false}
+                  run={runConfetti}
                 />
       <div className="max-w-2xl w-[90%] ">
         <div className="bg-miracle-white rounded-lg border border-gray-200 shadow-xl p-6 mb-4">
@@ -249,23 +254,24 @@ export default function Controller() {
                 {currentQuestion.options.map((option, index) => (
                   <button
                     key={index}
-                    className={`p-4 relative text-left transition-all rounded-lg ${
+                    className={`p-4 relative text-left transition-all rounded-lg ring-2 ${
                       answerIndex === index
-                        ? "bg-miracle-lightBlue text-white"
-                        : "ring-2 ring-[#00aae7]/50 text-black bg-[#00aae7]/5"
+                        ? " ring-green-400 bg-green-50"
+                        : "ring-[#00aae7]/50 text-black bg-[#00aae7]/5"
                     }`}
                   >
-                    <span>{option.content}</span><span className="absolute right-1">{totalPlayers && (Math.round(option.count/totalPlayers)*100) + "%"}</span>
+                      <div style={{width:(totalPlayers !== null && totalPlayers !== 0) ?((option.count/totalPlayers)*100) + "%" : 0} } className={`absolute -z-10 rounded-lg transition-all duration-1000 ease-in-out ${answerIndex === index ? "bg-green-200" : "bg-miracle-lightBlue/30"} w-0 h-full top-0 left-0`}></div>
+                    <span>{option.content}</span><span className="absolute right-1">{totalPlayers !== null && totalPlayers !== 0 && (option.count/totalPlayers*100).toString().substring(0,2) + "%"}</span>
                   </button>
                 ))}
               </div>
               <div>
                 {
-                  gameStatus === "finished" ?  <button onClick={handleToppers} className="p-2 mt-5 bg-miracle-darkBlue text-white rounded-lg">
+                  timeLeft === 0 && (gameStatus === "finished" ?  <button onClick={handleToppers} className="p-2 mt-5 bg-miracle-darkBlue text-white rounded-lg">
                   Leader Board
               </button> : <button onClick={revealAnswer} className="p-2 mt-5 bg-miracle-darkBlue text-white rounded-lg">
                     Reveal Answer
-                </button>
+                </button>)
                 }
                 
               </div>

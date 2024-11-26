@@ -39,6 +39,7 @@ interface GameState {
   addQuestion: (question: Omit<Question, 'id'>) => void;
   removeQuestion: (id: number) => void;
   setQuestions: (questions: Question[]) => void;
+  setStudents : (students : Player[]) => void;
   clearState : () => void;
 }
 
@@ -66,6 +67,7 @@ export const useGameStore = create<GameState>((set) => ({
     questions: state.questions.filter(q => q.id !== id)
   })),
   setQuestions: (questions) => set({ questions }),
+  setStudents : (students) => set({students}),
   clearState : () => set({gameId: null,
     isAuthenticated : false,
     playerName: '',
