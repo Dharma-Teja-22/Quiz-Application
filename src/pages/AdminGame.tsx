@@ -266,7 +266,7 @@ export default function AdminGame() {
             <Confetti
                 className='w-screen h-screen z-50'
                 colors={['#00aae7','#2368a0','#0d416b','#ef4048','#232527']}
-                numberOfPieces={2000}
+                numberOfPieces={1500}
                 recycle={false}
                 run={runConfetti}
                 />

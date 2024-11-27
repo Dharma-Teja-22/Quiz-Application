@@ -69,9 +69,9 @@ export default function Controller() {
   // ]);
   const [runConfetti, setRunConfetti] = useState(false);
 
-  useEffect(() => {
-    console.log(students)
-  }, [students])
+  // useEffect(() => {
+  //   console.log(students)
+  // }, [students])
 
   const handleToppers = () => {
     ToppersButtonRef.current?.click();
@@ -232,12 +232,15 @@ export default function Controller() {
   //   }
   // },[timeLeft])
 
+  const sortedStudents = students && students.sort((a, b) => b.score - a.score)
+
+
   return (
     <div className="h-full bg-[#EEF7FF] flex items-center justify-center">
       <Confetti
         className='w-screen h-screen z-50'
         colors={['#00aae7', '#2368a0', '#0d416b', '#ef4048', '#232527']}
-        numberOfPieces={5000}
+        numberOfPieces={1500}
         recycle={false}
         run={runConfetti}
       />
@@ -247,7 +250,7 @@ export default function Controller() {
             <div className="flex justify-between">
               <div className="flex flex-col justify-center">
                 <h5 className=" text-miracle-black font-bold text-2xl">
-                  {useGameStore.getState().gameStatus === "finished" ? "Congratulations" : <span>Quiz ID  <br />  <p className="text-gray-400">{gameId}</p></span>}
+                  {useGameStore.getState().gameStatus === "finished" ? "Leaderboard" : <span>Quiz ID  <br />  <p className="text-gray-400">{gameId}</p></span>}
                 </h5>
               </div>
               <img src={dsLogo} width={100} alt="" />
@@ -311,7 +314,7 @@ export default function Controller() {
                 {useGameStore.getState().gameStatus === "finished" || isLastQuestion ? (
                   <div className="flex flex-col pb-2 h-[350px] overflow-auto no-scrollbar">
 
-                    { students && students.slice(0, 10).map((player : Player) => <div
+                    { sortedStudents && sortedStudents.slice(0, 10).map((player : Player) => <div
                         key={player.name}
                         className="bg-white w-full mt-2 text-xl rounded-lg py-2 px-1 transition-all duration-200 border border-gray-200 max-h-[53px]"
                       >

@@ -26,7 +26,7 @@ export default function ToppersModal({ToppersButtonRef} : {ToppersButtonRef : Re
         <DialogTrigger className="hidden" ref={ToppersButtonRef}></DialogTrigger>
         <DialogContent>
             <DialogHeader>
-            <DialogTitle className="text-2xl">Congratulations</DialogTitle>
+            <DialogTitle className="text-2xl">Leaderboard</DialogTitle>
             <DialogDescription>
             {/* <div className="flex justify-evenly items-end mb-4 border-b-2 border-gray-300"> */}
           {/* Display top 3 students with height proportional to their scores */}

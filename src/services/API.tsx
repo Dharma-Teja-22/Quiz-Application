@@ -1,5 +1,5 @@
 import axios from "axios";
-const SERVER_URL = import.meta.env.VITE_SERVER_URL;
+const SERVER_URL = import.meta.env.VITE_SERVER_URL || window.location.origin;
 console.log(SERVER_URL);
 export default {
     post: {
