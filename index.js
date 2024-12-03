@@ -6,8 +6,9 @@ import xlsx from "xlsx";
 import express from "express";
 import multer from "multer";
 import cors from "cors";
-
-let quizData;
+import axios from "axios";
+import dotenv from 'dotenv'
+dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -177,6 +178,7 @@ io.on("connection", (socket) => {
         break;
       case "end":
         io.emit("end",gameId);
+        saveToExcel(game,gameId);
         quizzes.delete(gameId);
         console.log("after deleting",quizzes.get(gameId));
         break;
@@ -214,6 +216,25 @@ io.on("connection", (socket) => {
   //   });
   // });
 });
+
+async function saveToExcel(quiz,quizId) {
+  const participants = Array.from(quiz.players.values());
+  console.log(participants)
+  const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw6ydTwmbxRTCdDnhZn___OwHpiIJrDyR2URYMviDNThdbAerUKBC2QyhGJAOFbFC92/exec"
+  
+
+  try {
+      const response = await axios.post(GOOGLE_SCRIPT_URL, {
+          quizId,
+          participants
+      });
+      console.log("data added successfully")
+  } 
+  catch (error) {
+      console.error('Error adding data to spreadsheet:', error);
+  }
+}
+
 
 function startQuestion(gameId, type) {
   const game = quizzes.get(gameId);
@@ -303,6 +324,29 @@ app.get("/api/qna", (req, res) => {
     return res.status(404).json({ error: "Game ID not found" });
   }
 
+});
+
+app.get('/push-data', async (req, res) => {
+  const quizId = req.query.quizId;
+  const quiz = quizzes.get(quizId);
+  // const participants = [{name : "revanth",score : 28},{name : "Dharma",score : 78}]
+  const participants = Array.from(quiz.players.values());
+  console.log(participants)
+  const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw6ydTwmbxRTCdDnhZn___OwHpiIJrDyR2URYMviDNThdbAerUKBC2QyhGJAOFbFC92/exec"
+  
+
+  try {
+      const response = await axios.post(GOOGLE_SCRIPT_URL, {
+          quizId,
+          participants
+      });
+      
+      res.status(201).json(response.data);
+  } 
+  catch (error) {
+      console.error('Error adding data to spreadsheet:', error);
+      res.status(500).json({ error: 'Error adding data to spreadsheet.' });
+  }
 });
 
 const PORT = process.env.PORT || 3001;
