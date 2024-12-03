@@ -265,7 +265,7 @@ export default function PlayerGame() {
                       }`}
                       disabled={isAnswerLocked || timeLeft === 0}
                     >
-                      {option.content}
+                      {String.fromCharCode(65 + index) + "."} {option.content}
                     </button>
                   ))}
                 </div>

@@ -25,6 +25,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { Button } from "@/components/ui/button";
 
 interface Question {
   id: number;
@@ -56,7 +57,7 @@ export default function Controller() {
   const [playerStatus, setPlayerStatus] = useState<Player2 | null>({ score: 0, rank: 0 });
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [answerIndex, setAnswerIndex] = useState<number>(-1);
+  const [answerIndex, setAnswerIndex] = useState<number>(1);
   const [totalPlayers, setTotalPlayers] = useState<number | null>(null)
   const ToppersButtonRef = useRef<HTMLButtonElement>(null);
   const [students,setStudents] = useState<Player[] | null>(null)
@@ -122,7 +123,7 @@ export default function Controller() {
       if (quizId === gameId) {
         toast({
           title: playerData.name + " joined Quiz",
-          duration: 1000
+          duration: 2000
         })
       }
     });
@@ -206,17 +207,6 @@ export default function Controller() {
     };
   }, [socket]);
 
-  // const revealAnswer = () => {
-  //   console.log("reveal")
-  //   socket?.emit('getAnswerIndex', { gameId, currentQuestion }, (response: { success: boolean,answerIndex : number}) => {
-  //       if (response.success) {
-  //         console.log(response)
-  //         setAnswerIndex(response.answerIndex)
-
-  //       }
-  //     });
-  // }
-
   useEffect(() => {
     if (timeLeft === 0 && currentQuestion) {
       console.log("status", gameId)
@@ -245,7 +235,7 @@ export default function Controller() {
 
 
   return (
-    <div className="h-full bg-[#EEF7FF] flex items-center justify-center">
+    <div className="h-full relative overflow-hidden bg-[url('./assets/bgController.png')] bg-cover flex items-center justify-center">
       <Confetti
         className='w-screen h-screen z-50'
         colors={['#00aae7', '#2368a0', '#0d416b', '#ef4048', '#232527']}
@@ -253,8 +243,9 @@ export default function Controller() {
         recycle={false}
         run={runConfetti}
       />
-      <div className="max-w-2xl w-[90%] h-full overflow-hidden flex justify-center items-center">
-        <div className="bg-miracle-white w-full rounded-lg border border-gray-200 px-6">
+      <div className="w-full h-full bg-black absolute opacity-30"></div>
+      <div className="max-w-2xl relative w-[90%] h-full overflow-hidden flex justify-center items-center">
+        <div className="bg-miracle-white w-full rounded-lg border border-gray-200 px-6 pb-5">
           <div className=" ">
             <div className="flex justify-between">
               <div className="flex flex-col justify-center">
@@ -289,26 +280,26 @@ export default function Controller() {
               </h3>
               <div className="grid md:grid-cols-2 grid-cols-1 gap-4 pb-5">
                 {currentQuestion.options.map((option, index) => (
-                  <button
+                  <Button
                     key={index}
-                    className={`p-6 relative text-left text-white  transition-all rounded-sm  ${answerIndex === index
-                      ? "!bg-green-600 animate-bounce   text-black"
-                      : "ring-[#00aae7]/70 text-black "}${index == 0 && "bg-[#cf1578]"} ${index == 1 && "bg-[#dd802a]"} ${index == 2 && "bg-[#039fbe]"} ${index == 3 && "bg-[#b20238]"}`}
+                    disabled={answerIndex === -1 ? false :  answerIndex !== index}
+                    className={`p-6 relative text-left text-white transition-all ${answerIndex === index && "animate-bounce"} rounded-sm ring-[#00aae7]/70 ${index == 0 && "bg-[#e21b3c]"} ${index == 1 && "bg-[#1368ce]"} ${index == 2 && "bg-[#D89E02]"} ${index == 3 && "bg-[#27890d]"}`}
                   >
-                    <div style={{ width: (totalPlayers !== null && totalPlayers !== 0) ? ((option.count / totalPlayers) * 100).toFixed(2) + "%" : "0%" }} className={`absolute  rounded-lg transition-all duration-1000 ease-in-out ${answerIndex === index ? "bg-green-600" : "bg-miracle-lightBlue/30"} w-0 h-full top-0 left-0`}></div>
-                    <div className="absolute top-0 left-0 w-full h-full flex justify-between items-center">
+                    {/* <div style={{ width: (totalPlayers !== null && totalPlayers !== 0) ? ((option.count / totalPlayers) * 100).toFixed(2) + "%" : "0%" }} className={`absolute  rounded-sm transition-all duration-1000 ease-in-out bg-miracle-lightBlue/30 w-0 h-full top-0 left-0`}>
+                    </div> */}
+                    <div className="absolute top-0 left-0 w-full h-full flex justify-between items-center text-white">
                       <div className="ml-2">
-                        {option.content}
+                      {String.fromCharCode(65 + index) + "."} {option.content}
                       </div>
                       <div className="mr-2">
                         {totalPlayers !== null && totalPlayers !== 0 && Number(((option.count / totalPlayers) * 100).toFixed(2)) + "%"}
                       </div>
                     </div>
-                  </button>
+                  </Button>
                   
                 ))}
               </div>
-               { answerIndex>=0 && <div className=" bg-miracle-darkBlue text-white text-center w-full p-2 italic font-semibold text-2xl">Correct Answer is : Option {answerIndex+1}</div>}
+               { answerIndex>=0 && <div className=" bg-miracle-darkBlue text-white text-center w-full p-2 italic font-semibold text-2xl">Correct Answer is : Option {String.fromCharCode(65 + answerIndex) }</div>}
               <div>
                 {
                   timeLeft === 0 && useGameStore.getState().gameStatus === "finished" && <button onClick={handleToppers} className="p-2 mt-5 bg-miracle-darkBlue text-white rounded-lg">

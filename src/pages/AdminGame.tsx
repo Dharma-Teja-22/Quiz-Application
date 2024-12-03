@@ -201,7 +201,7 @@ export default function AdminGame() {
             <div className="max-h-[500px] md:max-h-full grid grid-rows-8 md:h-full bg-white mb-3 p-2 xl:p-5 col-span-1 rounded-lg border border-gray-200 md:mb-0">
               <div className="flex flex-col row-span-2 md:row-span-1 md:flex-row md:justify-between items-start gap-4">
                 <div className=''>
-                  <h1 className="text-2xl font-bold text-miracle-darkBlue">Quiz Control Panel { useGameStore.getState().gameStatus}</h1>
+                  <h1 className="text-2xl font-bold text-miracle-darkBlue">Quiz Control Panel</h1>
                   <p className="text-miracle-darkGrey">Quiz ID: {gameId}</p>
                   
                   
