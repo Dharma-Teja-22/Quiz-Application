@@ -99,7 +99,7 @@ export default function PlayerGame() {
       "question",
       (question: Question, timeLeft, type, isFinalQuestion, quizId) => {
         if (quizId === gameId) {
-          if (type === "next") {
+          if (type === "next" || type === "start") {
             localStorage.setItem("localSelectedAnswer", "null");
             localStorage.setItem("localIsAnswerlocked", "false");
             localStorage.setItem(

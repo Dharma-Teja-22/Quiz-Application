@@ -8,6 +8,15 @@ import gameCup from '../assets/cup.png';
 import { useToast } from "@/hooks/use-toast";
 import ToppersModal from './ToppersModal'
 import Confetti from 'react-confetti'
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
 
 import { formatName } from './AdminGame'
 import {
@@ -47,7 +56,7 @@ export default function Controller() {
   const [playerStatus, setPlayerStatus] = useState<Player2 | null>({ score: 0, rank: 0 });
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [answerIndex, setAnswerIndex] = useState<number | null>(null);
+  const [answerIndex, setAnswerIndex] = useState<number>(-1);
   const [totalPlayers, setTotalPlayers] = useState<number | null>(null)
   const ToppersButtonRef = useRef<HTMLButtonElement>(null);
   const [students,setStudents] = useState<Player[] | null>(null)
@@ -121,7 +130,7 @@ export default function Controller() {
     socket.on("question", (question, timeLeft, type, isFinalQuestion, quizId) => {
       if (quizId === gameId) {
         setTotalPlayers(null);
-        setAnswerIndex(null);
+        setAnswerIndex(-1);
         if (type === "next") {
           localStorage.setItem("localSelectedAnswer", "null");
           localStorage.setItem("localIsAnswerlocked", "false");
@@ -245,8 +254,8 @@ export default function Controller() {
         run={runConfetti}
       />
       <div className="max-w-2xl w-[90%] h-full overflow-hidden flex justify-center items-center">
-        <div className="bg-miracle-white w-full rounded-lg border border-gray-200 p-6">
-          <div className=" mb-2">
+        <div className="bg-miracle-white w-full rounded-lg border border-gray-200 px-6">
+          <div className=" ">
             <div className="flex justify-between">
               <div className="flex flex-col justify-center">
                 <h5 className=" text-miracle-black font-bold text-2xl">
@@ -255,7 +264,7 @@ export default function Controller() {
               </div>
               <img src={dsLogo} width={100} alt="" />
             </div>
-            <hr></hr>
+
             {
               timeLeft > 0 && <div className="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
                 <div className={`bg-miracle-lightBlue h-2.5 rounded-full transition-all duration-1000 ease-linear`} style={{ width: (timeLeft * 10) + "%" }} ></div>
@@ -263,7 +272,7 @@ export default function Controller() {
             }
           </div>
 
-
+          <hr></hr>
           {gameStarted ? useGameStore.getState().gameStatus === "paused" ? (
             <div className="text-center py-8">
               <h3 className="text-xl font-semibold text-miracle-darkGrey">
@@ -275,19 +284,18 @@ export default function Controller() {
             </div>
           ) : currentQuestion && useGameStore.getState().gameStatus !== "finished" ? (
             <>
-              <h3 className="text-xl font-semibold text-miracle-black mb-6">
+              <h3 className="text-xl font-semibold text-miracle-black py-3">
                 {currentQuestion.question}
               </h3>
-              <div className="grid md:grid-cols-2 grid-cols-1 gap-4">
+              <div className="grid md:grid-cols-2 grid-cols-1 gap-4 pb-5">
                 {currentQuestion.options.map((option, index) => (
                   <button
                     key={index}
-                    className={`p-6 relative text-left transition-all rounded-lg ring-2 ${answerIndex === index
-                      ? " ring-green-400 bg-green-50"
-                      : "ring-[#00aae7]/50 text-black bg-[#00aae7]/5"
-                      }`}
+                    className={`p-6 relative text-left text-white  transition-all rounded-sm  ${answerIndex === index
+                      ? "!bg-green-600 animate-bounce   text-black"
+                      : "ring-[#00aae7]/70 text-black "}${index == 0 && "bg-[#cf1578]"} ${index == 1 && "bg-[#dd802a]"} ${index == 2 && "bg-[#039fbe]"} ${index == 3 && "bg-[#b20238]"}`}
                   >
-                    <div style={{ width: (totalPlayers !== null && totalPlayers !== 0) ? ((option.count / totalPlayers) * 100).toFixed(2) + "%" : "0%" }} className={`absolute  rounded-lg transition-all duration-1000 ease-in-out ${answerIndex === index ? "bg-green-300" : "bg-miracle-lightBlue/30"} w-0 h-full top-0 left-0`}></div>
+                    <div style={{ width: (totalPlayers !== null && totalPlayers !== 0) ? ((option.count / totalPlayers) * 100).toFixed(2) + "%" : "0%" }} className={`absolute  rounded-lg transition-all duration-1000 ease-in-out ${answerIndex === index ? "bg-green-600" : "bg-miracle-lightBlue/30"} w-0 h-full top-0 left-0`}></div>
                     <div className="absolute top-0 left-0 w-full h-full flex justify-between items-center">
                       <div className="ml-2">
                         {option.content}
@@ -297,8 +305,10 @@ export default function Controller() {
                       </div>
                     </div>
                   </button>
+                  
                 ))}
               </div>
+               { answerIndex>=0 && <div className=" bg-miracle-darkBlue text-white text-center w-full p-2 italic font-semibold text-2xl">Correct Answer is : Option {answerIndex+1}</div>}
               <div>
                 {
                   timeLeft === 0 && useGameStore.getState().gameStatus === "finished" && <button onClick={handleToppers} className="p-2 mt-5 bg-miracle-darkBlue text-white rounded-lg">
@@ -309,53 +319,45 @@ export default function Controller() {
               </div>
             </>
           ) : (
-            <div className="text-center py-2">
-              <h3 className="text-xl font-semibold text-miracle-lightGrey">
+            <div className="text-center  ">
+              <h3 className="text-xl font-semibold ">
                 {useGameStore.getState().gameStatus === "finished" || isLastQuestion ? (
                   <div className="flex flex-col pb-2 h-[350px] overflow-auto no-scrollbar">
 
-                    { sortedStudents && sortedStudents.slice(0, 10).map((player : Player) => <div
-                        key={player.name}
-                        className="bg-white w-full mt-2 text-xl rounded-lg py-2 px-1 transition-all duration-200 border border-gray-200 max-h-[53px]"
-                      >
-                        <div className="flex items-center gap-3 justify-between">
-                          <div className="flex items-center">
-                            <div className="rounded-full">
-                              <img
-                                src={`https://avatar.iran.liara.run/username?username=${player?.name}`}
-                                alt="avatar"
-                                width={30}
-                              />
-                            </div>
-                            <TooltipProvider>
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <h3 className="font-medium ml-2 text-miracle-black flex items-center">
-                                    {formatName(player?.name)}
-                                  </h3>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                  <p>{player.name}</p>
-                                </TooltipContent>
-                              </Tooltip>
-                            </TooltipProvider>
-                          </div>
-                          <div className="flex justify-between items-center h-full">
-                            <div className="flex items-center">
-                              <span className="text-lg font-bold text-miracle-black">
-                                {player.score}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                      </div>) }
+
+                    <div className="bg-white w-full   text-xl rounded-lg py-2 px-1 transition-all duration-200  max-h-[53px] pointer-events-none">
+                      <hr></hr>
+                      <div className="flex items-center   justify-between">
+                        <Table className="">
+                          <TableHeader>
+                            <TableRow className="bg-black ">
+                              <TableHead className="w-[100px] font-bold text-white">Rank</TableHead>
+                              <TableHead className="text-left font-bold text-white">Name</TableHead>
+                              <TableHead className="w-[70px] text-right font-bold text-white">Score</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {sortedStudents && sortedStudents.slice(0, 10).map((player: Player, index) =>
+                              <TableRow className={`${index % 2 == 0 ? "text-white bg-miracle-lightBlue " : "text-white bg-miracle-darkBlue "}`}>
+                                <TableCell className="font-bold text-left">#{index + 1}</TableCell>
+                                <TableCell className="text-left">{player.name}</TableCell>
+                                <TableCell className="text-left">{player.score}</TableCell>
+                              </TableRow>
+                            )}
+                          </TableBody>
+                        </Table>
+                      </div>
+                    </div>
+
+
+
                   </div>
                 ) : (
                   "Waiting for the next question..."
                 )}
               </h3>
             </div>
-          ) : <h3 className="text-xl font-semibold text-center text-miracle-darkGrey">Get ready! The quiz is about to start...</h3>}
+          ) : <h3 className="text-xl flex items-center justify-center font-semibold text-center text-miracle-darkGrey h-24">Get ready! The quiz is about to start...</h3>}
         </div>
       </div>
     </div>
